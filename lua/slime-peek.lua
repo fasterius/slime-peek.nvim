@@ -88,6 +88,15 @@ function M.print_names()
     end
 end
 
+-- TODO: Possible additions include
+--       - Tail of object
+--       - Classes of data frame columns
+--       - Summary of object
+--       - Length / size of object
+--       - Extensions of the existing to work with individual columns, e.g.
+--         finding not just the word under the cursor but also df$column or
+--         df['column']
+
 -- Add user commands for main plugin functions
 vim.api.nvim_create_user_command("PrintHead", M.print_head, { desc = "Print the head of a data frame" })
 vim.api.nvim_create_user_command("PrintNames", M.print_names, { desc = "Print the column names of a data frame" })

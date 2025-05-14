@@ -57,6 +57,10 @@ verbose way, if you prefer:
 vim.keymap.set('n', '<localleader>h', require('slime-peek').print_head)
 ```
 
+<!-- TODO: Make it clear that slime-peek doesn't know anything about the objects that -->
+<!-- are sent, they are just convenient functions to send things to a terminal. The -->
+<!-- user should already know what the object under the cursor is. -->
+
 ## ⚙️ Configuration
 
 A more complete installation with configuration of keymaps and lazy loading
