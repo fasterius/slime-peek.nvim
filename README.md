@@ -3,6 +3,7 @@
 A Neovim plugin that adds convenience functions for data exploration using
 [vim-slime](https://github.com/jpalardy/vim-slime).
 
+<!-- TODO: Make a screencast to display as an example of plugin functionality. -->
 <!-- https://github.com/fasterius/simple-zoom.nvim/assets/12528765/354e67fa-5bc0-4aae-a41d-5f0440de21ff -->
 
 ## ✨ Features
@@ -14,6 +15,8 @@ A Neovim plugin that adds convenience functions for data exploration using
 ## 📚 Requirements
 
 The [vim-slime](https://github.com/jpalardy/vim-slime) plugin.
+
+<!-- TODO: Check through plugin code and find minimum Neovim version required. -->
 
 ## 📦 Installation
 
@@ -56,10 +59,10 @@ detect which language you are working with, whether that be R / Python scripts
 or R Markdown / Quarto documents and send the appropriate code to `vim-slime`.
 The commands available are as follows:
 
-- `PrintHead`
-- `PrintNames`
+- `PrintHead`: Print the head of the word under the cursor.
+- `PrintNames`: Print the column header of the word under the cursor.
 
-If you want to create a key map for toggling zoom, you can do something like
+If you want to create a key map for the commands, you can do something like
 this:
 
 ```lua
