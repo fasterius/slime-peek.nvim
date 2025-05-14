@@ -1,4 +1,4 @@
-# 🔍 Unnamed
+# 👀 Slime-peek
 
 A Neovim plugin that adds convenience functions for data exploration using
 [vim-slime](https://github.com/jpalardy/vim-slime).
@@ -21,14 +21,14 @@ You can install the plugin with your preferred package manager:
 
 ```lua
 {
-    "fasterius/unnamed.nvim",
+    "fasterius/slime-peek.nvim",
     config = true,
 }
 ```
 
 ## ⚙️ Configuration
 
-`unnamed` comes with the following options and their respective defaults:
+`slime-peek` comes with the following options and their respective defaults:
 
 ```lua
 {
@@ -41,7 +41,7 @@ A more complete installation and configuration could look like this:
 
 ```lua
 {
-    "fasterius/simple-zoom.nvim",
+    "fasterius/slime-peek.nvim",
     opts = {
         my_config_value = true
     }
@@ -70,16 +70,16 @@ You can also access the underlying plugin function directly in a slightly more
 verbose way, if you prefer:
 
 ```lua
-vim.keymap.set('n', '<localleader>h', require('unnamed').printHead)
+vim.keymap.set('n', '<localleader>h', require('slime-peek').printHead)
 ```
 
 ## 📕 About
 
 If you already perform data exploration and/or analyses using R / Python, Neovim
 and [vim-slime](https://github.com/jpalardy/vim-slime) (or if you'd like to
-start doing so), `unnamed.nvim` is for you! The aim of this plugin is to provide
-convenient ways for simple data exploration tasks while working with a REPL
-using the `vim-slime` plugin.
+start doing so), `slime-peek.nvim` is for you! The aim of this plugin is to
+provide convenient ways for simple data exploration tasks while working with a
+REPL using the `vim-slime` plugin.
 
 The tasks include things such as looking at the head of a data frame or the
 column names of a data frame. These are not complex tasks, but it is convenient
