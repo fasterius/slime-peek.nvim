@@ -1,0 +1,68 @@
+ *slime-peek.nvim.txt*          Peek at data frames and objects with vim-slime
+
+==============================================================================
+
+ Table of contents                             *slime-peek.table-of-contents*
+
+ 1. Introduction 	         |slime-peek.introduction|
+ 2. Usage		         |slime-peek.usage|
+ 4. Functions		         |slime-peek.functions|
+
+==============================================================================
+
+ 1. INTRODUCTION      				    *slime-peek.introduction*
+
+ The aim of this plugin is to add convenience functions for data exploration
+ tasks when using `vim-slime` with Python and R, such as quickly peeking at
+ the head or column names of a data frame.
+
+ The plugin will automatically detect which of the supported languages are
+ currently in use in your document, whether that be Python or R scripts, R
+ Markdown or Quarto documents.
+
+==============================================================================
+
+ 2. USAGE      						   *slime-peek.usage*
+
+ This plugin does not export any key mappings, but supplies user-commands for
+ its functionality:
+
+ :PrintHead    			                       *slime-peek.PrintHead*
+
+   This command prints the head of the word currently under the cursor in
+   whatever REPL is configured with the `vim-slime` plugin.
+
+   If you want to create a key map for this command, you can do something like
+   the following:
+>lua
+     vim.keymap.set('n', '<localleader>h', ':PrintHead<CR>')
+<
+ :PrintNames                                          *slime-peek.PrintNames*
+
+   This command prints the column names of the word currently under the cursor
+   in whatever REPL is configured with the `vim-slime` plugin.
+
+   If you want to create a key map for this command, you can do something like
+   the following:
+>lua
+     vim.keymap.set('n', '<localleader>n', ':PrintNames<CR>')
+<
+==============================================================================
+
+ 4. FUNCTIONS 					       *slime-peek.functions*
+
+ print_head()   				      *slime-peek.print_head*
+
+   This is the plugin function that `PrintHead` calls to print the head of the
+   word under the cursor. You can also use this in a keymap:
+>lua
+     vim.keymap.set('n', '<localleader>h', require('slime-peek').print_head())
+<
+ print_names()   				     *slime-peek.print_names*
+
+   This is the plugin function that `PrintNames` calls to print the column
+   namnes of the word under the cursor. You can also use this in a keymap:
+>lua
+     vim.keymap.set('n', '<localleader>n', require('slime-peek').print_names())
+<
+ vim:tw=78:ts=8:noet:ft=help:norl:
