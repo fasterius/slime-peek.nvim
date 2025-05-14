@@ -66,6 +66,12 @@ local function get_file_language()
     end
 end
 
+-- Internal function to send a notification about a language error when a
+-- retrieved language from a document isn't a supported language
+local function send_language_error()
+    vim.notify("Error: requires Python or R", vim.log.levels.ERROR)
+end
+
 -- Function to print the head of the data frame under the cursor
 function M.print_head()
     -- Get the current word under the cursor
@@ -77,7 +83,7 @@ function M.print_head()
     elseif language == "python" then
         vim.cmd('SlimeSend0 "' .. current_word .. '.head()\\n"')
     else
-        print("Error: requires Python or R")
+        send_language_error()
     end
 end
 
@@ -93,7 +99,7 @@ function M.print_names()
     elseif language == "python" then
         vim.cmd('SlimeSend0 "list(' .. current_word .. ')\\n"')
     else
-        print("Error: requires Python or R")
+        send_language_error()
     end
 end
 
