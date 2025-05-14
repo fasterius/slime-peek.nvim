@@ -8,9 +8,18 @@ local function get_quarto_language()
     -- Store the current cursor position for later repositioning
     local current_position = vim.api.nvim_win_get_cursor(0)
 
-    -- Parse the YAML header and get the line with language information
+    -- Get the ending line number of the YAML header without moving the cursor
     vim.api.nvim_command("normal! gg")
-    local line_number = vim.fn.search("^knitr:\\|^jupyter:\\|^engine:", "W")
+    local yaml_end_line = vim.fn.search("^---$", "nW")
+
+    -- Abort if no YAML header found
+    if yaml_end_line == 0 then
+        return nil
+    end
+
+    -- Search through the YAML header and get the line with language information
+    local pattern = "^knitr:\\|^jupyter:\\|^engine:"
+    local line_number = vim.fn.search(pattern, "W", yaml_end_line)
 
     -- Reposition cursor to original position
     vim.api.nvim_win_set_cursor(0, current_position)
