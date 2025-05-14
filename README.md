@@ -54,7 +54,7 @@ You can also access the underlying plugin function directly in a slightly more
 verbose way, if you prefer:
 
 ```lua
-vim.keymap.set('n', '<localleader>h', require('slime-peek').printHead)
+vim.keymap.set('n', '<localleader>h', require('slime-peek').print_head)
 ```
 
 ## ⚙️ Configuration
@@ -71,8 +71,8 @@ could look like this:
         { "<localleader>n" },
     },
     config = function()
-        vim.keymap.set("n", "<localleader>h", require("slime-peek").printHead)
-        vim.keymap.set("n", "<localleader>n", require("slime-peek").printNames)
+        vim.keymap.set("n", "<localleader>h", require("slime-peek").print_head)
+        vim.keymap.set("n", "<localleader>n", require("slime-peek").print_names)
     end
 }
 ```
