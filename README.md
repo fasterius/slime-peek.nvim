@@ -1,5 +1,7 @@
 # 👀 Slime-peek
 
+<!-- TODO: Update documentation text and work in plugin name more. -->
+
 A Neovim plugin that adds convenience functions for data exploration using
 [vim-slime](https://github.com/jpalardy/vim-slime).
 
@@ -25,29 +27,8 @@ You can install the plugin with your preferred package manager:
 ```lua
 {
     "fasterius/slime-peek.nvim",
+    dependencies = "jpalardy/vim-slime",
     config = true,
-}
-```
-
-## ⚙️ Configuration
-
-`slime-peek` comes with the following options and their respective defaults:
-
-```lua
-{
-    -- Description
-    my_config_value = true
-}
-```
-
-A more complete installation and configuration could look like this:
-
-```lua
-{
-    "fasterius/slime-peek.nvim",
-    opts = {
-        my_config_value = true
-    }
 }
 ```
 
@@ -74,6 +55,26 @@ verbose way, if you prefer:
 
 ```lua
 vim.keymap.set('n', '<localleader>h', require('slime-peek').printHead)
+```
+
+## ⚙️ Configuration
+
+A more complete installation with configuration of keymaps and lazy loading
+could look like this:
+
+```lua
+{
+    "fasterius/slime-peek.nvim",
+    dependencies = "jpalardy/vim-slime",
+    keys = {
+        { "<localleader>h" },
+        { "<localleader>n" },
+    },
+    config = function()
+        vim.keymap.set("n", "<localleader>h", require("slime-peek").printHead)
+        vim.keymap.set("n", "<localleader>n", require("slime-peek").printNames)
+    end
+}
 ```
 
 ## 📕 About
