@@ -83,35 +83,57 @@ local function get_file_language()
     end
 end
 
+-- Internal function to get language-specific commands
+local function get_r_command(operation, object)
+    return operation .. "(" .. object .. ")\\n"
+end
+
+local function get_python_command(operation, object)
+    return object .. "." .. operation .. "()\\n"
+end
+
+-- Internal function to send a specific command to the REPL
+local function send_command_to_repl(operation)
+    -- Get the word under the cursor
+    local word_under_cursor = vim.fn.expand("<cword>")
+
+    -- Get the current language
+    local language = get_file_language()
+
+    -- Get the language-appropriate command
+    local command
+    if language == "r" then
+        command = get_r_command(operation, word_under_cursor)
+    elseif language == "python" then
+        -- Handle differing operation names between R and Python
+        if operation == "names" then
+            operation = "list"
+        end
+        command = get_python_command(operation, word_under_cursor)
+    end
+
+    -- Send the command to the REPL
+    if command then
+        vim.cmd('SlimeSend0 "' .. command .. '"')
+    end
+end
+
 -- Function to print the head of the data frame under the cursor
 function M.print_head()
-    -- Get the current word under the cursor
-    local current_word = vim.fn.expand("<cword>")
-    -- Print the language-dependent head of the current word
-    local language = get_file_language()
-    if language == "r" then
-        vim.cmd('SlimeSend0 "head(' .. current_word .. ')\\n"')
-    elseif language == "python" then
-        vim.cmd('SlimeSend0 "' .. current_word .. '.head()\\n"')
-    end
+    send_command_to_repl("head")
+end
+
+-- Function to print the tail of the data frame under the cursor
+function M.print_tail()
+    send_command_to_repl("tail")
 end
 
 -- Function to print the column names of the data frame under the cursor
 function M.print_names()
-    -- Get the current word under the cursor
-    local current_word = vim.fn.expand("<cword>")
-
-    -- Print the language-dependent column names of the current word
-    local language = get_file_language()
-    if language == "r" then
-        vim.cmd('SlimeSend0 "names(' .. current_word .. ')\\n"')
-    elseif language == "python" then
-        vim.cmd('SlimeSend0 "list(' .. current_word .. ')\\n"')
-    end
+    send_command_to_repl("names")
 end
 
 -- TODO: Possible additions include
---       - Tail of object
 --       - Classes of data frame columns
 --       - Summary of object
 --       - Length / size of object
@@ -121,6 +143,7 @@ end
 
 -- Add user commands for main plugin functions
 vim.api.nvim_create_user_command("PrintHead", M.print_head, { desc = "Print the head of an object" })
+vim.api.nvim_create_user_command("PrintTail", M.print_tail, { desc = "Print the tail of an object" })
 vim.api.nvim_create_user_command("PrintNames", M.print_names, { desc = "Print the column names of an object" })
 
 return M

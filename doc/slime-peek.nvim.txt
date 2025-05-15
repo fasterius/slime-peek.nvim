@@ -37,6 +37,16 @@
 >lua
      vim.keymap.set('n', '<localleader>h', ':PrintHead<CR>')
 <
+ :PrintTail    			                       *slime-peek.PrintTail*
+
+   This command prints the tail of the word currently under the cursor in
+   whatever REPL is configured with the `vim-slime` plugin.
+
+   If you want to create a key map for this command, you can do something like
+   the following:
+>lua
+     vim.keymap.set('n', '<localleader>t', ':PrintTail<CR>')
+<
  :PrintNames                                          *slime-peek.PrintNames*
 
    This command prints the column names of the word currently under the cursor
@@ -57,6 +67,13 @@
    word under the cursor. You can also use this in a keymap:
 >lua
      vim.keymap.set('n', '<localleader>h', require('slime-peek').print_head())
+<
+ print_tail()   				      *slime-peek.print_tail*
+
+   This is the plugin function that `PrintTail` calls to print the tail of the
+   word under the cursor. You can also use this in a keymap:
+>lua
+     vim.keymap.set('n', '<localleader>t', require('slime-peek').print_tail())
 <
  print_names()   				     *slime-peek.print_names*
 
