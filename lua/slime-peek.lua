@@ -3,6 +3,12 @@ local M = {}
 -- Setup
 function M.setup() end
 
+-- Internal function for handling errors with a message
+local function raise_error(message)
+    vim.notify("Error: " .. message, vim.log.levels.ERROR)
+    return nil
+end
+
 -- Internal function to get the language of the current Quarto document
 local function get_quarto_language()
     -- Store the current cursor position for later repositioning
@@ -14,7 +20,9 @@ local function get_quarto_language()
 
     -- Abort if no YAML header found
     if yaml_end_line == 0 then
-        return nil
+        -- Reposition cursor to original position before raising error
+        vim.api.nvim_win_set_cursor(0, current_position)
+        return raise_error("YAML header not found")
     end
 
     -- Search through the YAML header and get the line with language information
@@ -26,7 +34,7 @@ local function get_quarto_language()
 
     -- Handle non-existant matches
     if line_number == 0 then
-        return nil
+        return raise_error("Quarto language not found")
     end
 
     -- Parse language information line and get document language
@@ -34,19 +42,22 @@ local function get_quarto_language()
     if line[1] == "engine:" then
         if line[2] == "knitr" then
             return "r"
-        else
+        elseif line[2] == "jupyter" then
             return "python"
         end
     elseif line[1] == "knitr:" then
         return "r"
     elseif line[1] == "jupyter:" then
         local kernel = string.match(vim.fn.getline(line_number), "^jupyter: (.*)")
-        if kernel == "python" or kernel == "r" then
-            return kernel
+        if kernel == "python" or kernel == "python3" then
+            return "python"
+        elseif kernel == "r" then
+            return "r"
+        else
+            return raise_error("Kernel '" .. kernel .. "' is not supported")
         end
-    else
-        return nil
     end
+    return raise_error("Quarto language not found")
 end
 
 -- Internal function to get the language of the current file
@@ -62,14 +73,8 @@ local function get_file_language()
     elseif filetype == "quarto" then
         return get_quarto_language()
     else
-        return nil
+        return raise_error("Filetype '" .. filetype .. "' is not supported")
     end
-end
-
--- Internal function to send a notification about a language error when a
--- retrieved language from a document isn't a supported language
-local function send_language_error()
-    vim.notify("Error: requires Python or R", vim.log.levels.ERROR)
 end
 
 -- Function to print the head of the data frame under the cursor
@@ -82,8 +87,6 @@ function M.print_head()
         vim.cmd('SlimeSend0 "head(' .. current_word .. ')\\n"')
     elseif language == "python" then
         vim.cmd('SlimeSend0 "' .. current_word .. '.head()\\n"')
-    else
-        send_language_error()
     end
 end
 
@@ -98,8 +101,6 @@ function M.print_names()
         vim.cmd('SlimeSend0 "names(' .. current_word .. ')\\n"')
     elseif language == "python" then
         vim.cmd('SlimeSend0 "list(' .. current_word .. ')\\n"')
-    else
-        send_language_error()
     end
 end
 
