@@ -172,11 +172,6 @@ function M.peek_types()
     send_command_to_repl("dtypes")
 end
 
--- TODO: Possible additions include
---       - Extensions of the existing to work with individual columns, e.g.
---         finding not just the word under the cursor but also df$column or
---         df['column']
-
 -- Add user commands for main plugin functions
 vim.api.nvim_create_user_command("PeekHead", M.peek_head, { desc = "Print the head of an object" })
 vim.api.nvim_create_user_command("PeekTail", M.peek_tail, { desc = "Print the tail of an object" })
