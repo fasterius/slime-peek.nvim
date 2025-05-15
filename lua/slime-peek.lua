@@ -52,7 +52,7 @@ local function get_quarto_language()
     elseif line[1] == "knitr:" then
         return "r"
     elseif line[1] == "jupyter:" then
-        local kernel = string.match(vim.fn.getline(line_number), "^jupyter: (.*)")
+        local kernel = line[2]
         if kernel == "python" or kernel == "python3" then
             return "python"
         elseif kernel == "r" then
