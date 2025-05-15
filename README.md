@@ -17,9 +17,8 @@ allowing you to swiftly peek at your R and Python objects together with
 
 ## 📚 Requirements
 
-The [vim-slime](https://github.com/jpalardy/vim-slime) plugin.
-
-<!-- TODO: Check through plugin code and find minimum Neovim version required. -->
+- Neovim >= **0.7.0**
+- The [vim-slime](https://github.com/jpalardy/vim-slime) Vim plugin
 
 ## 📦 Installation
 
