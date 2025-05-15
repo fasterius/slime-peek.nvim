@@ -94,7 +94,7 @@ local function get_python_command(operation, object)
     -- (with parentheses)
     local parentheses = "()"
     if operation == "names" then
-        operation = "list"
+        operation = "columns.tolist"
     elseif operation == "dim" then
         operation = "shape"
         parentheses = ""
