@@ -85,7 +85,14 @@ end
 
 -- Internal function to get language-specific commands
 local function get_r_command(operation, object)
-    return operation .. "(" .. object .. ")\\n"
+    -- Handle differing operation names between R and Python as well as whether
+    -- the operation is a non-trivial function call with extra code
+    local extra = ""
+    if operation == "dtypes" then
+        operation = "sapply"
+        extra = ", class"
+    end
+    return operation .. "(" .. object .. extra .. ")\\n"
 end
 
 local function get_python_command(operation, object)
@@ -97,6 +104,8 @@ local function get_python_command(operation, object)
         operation = "columns.tolist"
     elseif operation == "dim" then
         operation = "shape"
+        parentheses = ""
+    elseif operation == "dtypes" then
         parentheses = ""
     end
     return object .. "." .. operation .. parentheses .. "\\n"
@@ -144,9 +153,12 @@ function M.peek_dimensions()
     send_command_to_repl("dim")
 end
 
+-- Function to print the column types of the data frame under the cursor
+function M.peek_types()
+    send_command_to_repl("dtypes")
+end
+
 -- TODO: Possible additions include
---       - Classes of data frame columns
---       - Summary of object
 --       - Extensions of the existing to work with individual columns, e.g.
 --         finding not just the word under the cursor but also df$column or
 --         df['column']
@@ -156,5 +168,6 @@ vim.api.nvim_create_user_command("PeekHead", M.peek_head, { desc = "Print the he
 vim.api.nvim_create_user_command("PeekTail", M.peek_tail, { desc = "Print the tail of an object" })
 vim.api.nvim_create_user_command("PeekNames", M.peek_names, { desc = "Print the column names of an object" })
 vim.api.nvim_create_user_command("PeekDimensions", M.peek_dimensions, { desc = "Print the dimensions of an object" })
+vim.api.nvim_create_user_command("PeekTypes", M.peek_types, { desc = "Print the column types of an object" })
 
 return M

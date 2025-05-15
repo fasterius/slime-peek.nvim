@@ -45,7 +45,7 @@
    If you want to create a key map for this command, you can do something like
    the following:
 >lua
-     vim.keymap.set('n', '<localleader>t', ':PeekTail<CR>')
+     vim.keymap.set('n', '<localleader>T', ':PeekTail<CR>')
 <
  :PeekNames                                           *slime-peek.PeekNames*
 
@@ -67,6 +67,17 @@
 >lua
      vim.keymap.set('n', '<localleader>d', ':PeekDimensions<CR>')
 <
+ :PeekTypes                                           *slime-peek.PeekTypes*
+
+   This command prints the data types or classes of the columns of the word
+   currently under the cursor in whatever REPL is configured with the
+   `vim-slime` plugin.
+
+   If you want to create a key map for this command, you can do something like
+   the following:
+>lua
+     vim.keymap.set('n', '<localleader>t', ':PeekTypes<CR>')
+<
 ==============================================================================
 
  4. FUNCTIONS 					       *slime-peek.functions*
@@ -83,7 +94,7 @@
    This is the plugin function that `PeekTail` calls to print the tail of the
    word under the cursor. You can also use this in a keymap:
 >lua
-     vim.keymap.set('n', '<localleader>t', require('slime-peek').peek_tail())
+     vim.keymap.set('n', '<localleader>T', require('slime-peek').peek_tail())
 <
  peek_names()                                        *slime-peek.peek_names*
 
@@ -98,5 +109,13 @@
    dimensions of the word under the cursor. You can also use this in a keymap:
 >lua
      vim.keymap.set('n', '<localleader>d', require('slime-peek').peek_dimensions())
+<
+ peek_types()                                        *slime-peek.peek_types*
+
+   This is the plugin function that `PeekTypes` calls to print the data types
+   or classes of the columns of the word under the cursor. You can also use
+   this in a keymap:
+>lua
+     vim.keymap.set('n', '<localleader>t', require('slime-peek').peek_types())
 <
  vim:tw=78:ts=8:noet:ft=help:norl:
