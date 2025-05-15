@@ -125,22 +125,22 @@ local function send_command_to_repl(operation)
 end
 
 -- Function to print the head of the data frame under the cursor
-function M.print_head()
+function M.peek_head()
     send_command_to_repl("head")
 end
 
 -- Function to print the tail of the data frame under the cursor
-function M.print_tail()
+function M.peek_tail()
     send_command_to_repl("tail")
 end
 
 -- Function to print the column names of the data frame under the cursor
-function M.print_names()
+function M.peek_names()
     send_command_to_repl("names")
 end
 
 -- Function to print the dimensions of the data frame under the cursor
-function M.print_dimensions()
+function M.peek_dimensions()
     send_command_to_repl("dim")
 end
 
@@ -152,9 +152,9 @@ end
 --         df['column']
 
 -- Add user commands for main plugin functions
-vim.api.nvim_create_user_command("PrintHead", M.print_head, { desc = "Print the head of an object" })
-vim.api.nvim_create_user_command("PrintTail", M.print_tail, { desc = "Print the tail of an object" })
-vim.api.nvim_create_user_command("PrintNames", M.print_names, { desc = "Print the column names of an object" })
-vim.api.nvim_create_user_command("PrintDimensions", M.print_dimensions, { desc = "Print the dimensions of an object" })
+vim.api.nvim_create_user_command("PeekHead", M.peek_head, { desc = "Print the head of an object" })
+vim.api.nvim_create_user_command("PeekTail", M.peek_tail, { desc = "Print the tail of an object" })
+vim.api.nvim_create_user_command("PeekNames", M.peek_names, { desc = "Print the column names of an object" })
+vim.api.nvim_create_user_command("PeekDimensions", M.peek_dimensions, { desc = "Print the dimensions of an object" })
 
 return M

@@ -40,21 +40,21 @@ detect which language you are working with, whether that be R / Python scripts
 or R Markdown / Quarto documents and send the appropriate code to `vim-slime`.
 The commands available are as follows:
 
-- `PrintHead`: Print the head of the word under the cursor.
-- `PrintNames`: Print the column header of the word under the cursor.
+- `PeekHead`: Print the head of the word under the cursor.
+- `PeekNames`: Print the column header of the word under the cursor.
 
 If you want to create a key map for the commands, you can do something like
 this:
 
 ```lua
-vim.keymap.set('n', '<localleader>h', ':PrintHead<CR>')
+vim.keymap.set('n', '<localleader>h', ':PeekHead<CR>')
 ```
 
 You can also access the underlying plugin function directly in a slightly more
 verbose way, if you prefer:
 
 ```lua
-vim.keymap.set('n', '<localleader>h', require('slime-peek').print_head)
+vim.keymap.set('n', '<localleader>h', require('slime-peek').peek_head)
 ```
 
 <!-- TODO: Make it clear that slime-peek doesn't know anything about the objects that -->
@@ -75,8 +75,8 @@ could look like this:
         { "<localleader>n" },
     },
     config = function()
-        vim.keymap.set("n", "<localleader>h", require("slime-peek").print_head)
-        vim.keymap.set("n", "<localleader>n", require("slime-peek").print_names)
+        vim.keymap.set("n", "<localleader>h", require("slime-peek").peek_head)
+        vim.keymap.set("n", "<localleader>n", require("slime-peek").peek_names)
     end
 }
 ```

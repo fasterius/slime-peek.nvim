@@ -27,7 +27,7 @@
  This plugin does not export any key mappings, but supplies user-commands for
  its functionality:
 
- :PrintHead    			                       *slime-peek.PrintHead*
+ :PeekHead    			                       *slime-peek.PeekHead*
 
    This command prints the head of the word currently under the cursor in
    whatever REPL is configured with the `vim-slime` plugin.
@@ -35,9 +35,9 @@
    If you want to create a key map for this command, you can do something like
    the following:
 >lua
-     vim.keymap.set('n', '<localleader>h', ':PrintHead<CR>')
+     vim.keymap.set('n', '<localleader>h', ':PeekHead<CR>')
 <
- :PrintTail    			                       *slime-peek.PrintTail*
+ :PeekTail    		 	                       *slime-peek.PeekTail*
 
    This command prints the tail of the word currently under the cursor in
    whatever REPL is configured with the `vim-slime` plugin.
@@ -45,9 +45,9 @@
    If you want to create a key map for this command, you can do something like
    the following:
 >lua
-     vim.keymap.set('n', '<localleader>t', ':PrintTail<CR>')
+     vim.keymap.set('n', '<localleader>t', ':PeekTail<CR>')
 <
- :PrintNames                                          *slime-peek.PrintNames*
+ :PeekNames                                           *slime-peek.PeekNames*
 
    This command prints the column names of the word currently under the cursor
    in whatever REPL is configured with the `vim-slime` plugin.
@@ -55,9 +55,9 @@
    If you want to create a key map for this command, you can do something like
    the following:
 >lua
-     vim.keymap.set('n', '<localleader>n', ':PrintNames<CR>')
+     vim.keymap.set('n', '<localleader>n', ':PeekNames<CR>')
 <
- :PrintDimensions                                *slime-peek.PrintDimensions*
+ :PeekDimensions                                 *slime-peek.PeekDimensions*
 
    This command prints the dimensions of the word currently under the cursor
    in whatever REPL is configured with the `vim-slime` plugin.
@@ -65,38 +65,38 @@
    If you want to create a key map for this command, you can do something like
    the following:
 >lua
-     vim.keymap.set('n', '<localleader>d', ':PrintDimensions<CR>')
+     vim.keymap.set('n', '<localleader>d', ':PeekDimensions<CR>')
 <
 ==============================================================================
 
  4. FUNCTIONS 					       *slime-peek.functions*
 
- print_head()   				      *slime-peek.print_head*
+ peek_head()                                          *slime-peek.peek_head*
 
-   This is the plugin function that `PrintHead` calls to print the head of the
+   This is the plugin function that `PeekHead` calls to print the head of the
    word under the cursor. You can also use this in a keymap:
 >lua
-     vim.keymap.set('n', '<localleader>h', require('slime-peek').print_head())
+     vim.keymap.set('n', '<localleader>h', require('slime-peek').peek_head())
 <
- print_tail()   				      *slime-peek.print_tail*
+ peek_tail()                                          *slime-peek.peek_tail*
 
-   This is the plugin function that `PrintTail` calls to print the tail of the
+   This is the plugin function that `PeekTail` calls to print the tail of the
    word under the cursor. You can also use this in a keymap:
 >lua
-     vim.keymap.set('n', '<localleader>t', require('slime-peek').print_tail())
+     vim.keymap.set('n', '<localleader>t', require('slime-peek').peek_tail())
 <
- print_names()   				     *slime-peek.print_names*
+ peek_names()                                        *slime-peek.peek_names*
 
-   This is the plugin function that `PrintNames` calls to print the column
+   This is the plugin function that `PeekNames` calls to print the column
    names of the word under the cursor. You can also use this in a keymap:
 >lua
-     vim.keymap.set('n', '<localleader>n', require('slime-peek').print_names())
+     vim.keymap.set('n', '<localleader>n', require('slime-peek').peek_names())
 <
- print_dimensions()                             *slime-peek.print_dimensions*
+ peek_dimensions()                              *slime-peek.peek_dimensions*
 
-   This is the plugin function that `PrintDimensions` calls to print the
+   This is the plugin function that `PeekDimensions` calls to print the
    dimensions of the word under the cursor. You can also use this in a keymap:
 >lua
-     vim.keymap.set('n', '<localleader>d', require('slime-peek').print_dimensions())
+     vim.keymap.set('n', '<localleader>d', require('slime-peek').peek_dimensions())
 <
  vim:tw=78:ts=8:noet:ft=help:norl:
