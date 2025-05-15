@@ -9,10 +9,15 @@ local function raise_error(message)
     return nil
 end
 
+-- Internal function for resetting the cursor position
+local function set_cursor_position(position)
+    vim.api.nvim_win_set_cursor(0, position)
+end
+
 -- Internal function to get the language of the current Quarto document
 local function get_quarto_language()
     -- Store the current cursor position for later repositioning
-    local current_position = vim.api.nvim_win_get_cursor(0)
+    local original_cursor_position = vim.api.nvim_win_get_cursor(0)
 
     -- Get the ending line number of the YAML header without moving the cursor
     vim.api.nvim_command("normal! gg")
@@ -20,17 +25,14 @@ local function get_quarto_language()
 
     -- Abort if no YAML header found
     if yaml_end_line == 0 then
-        -- Reposition cursor to original position before raising error
-        vim.api.nvim_win_set_cursor(0, current_position)
+        set_cursor_position(original_cursor_position)
         return raise_error("YAML header not found")
     end
 
     -- Search through the YAML header and get the line with language information
     local pattern = "^knitr:\\|^jupyter:\\|^engine:"
     local line_number = vim.fn.search(pattern, "W", yaml_end_line)
-
-    -- Reposition cursor to original position
-    vim.api.nvim_win_set_cursor(0, current_position)
+    set_cursor_position(original_cursor_position)
 
     -- Handle non-existant matches
     if line_number == 0 then
