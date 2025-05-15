@@ -118,7 +118,7 @@ end
 --         df['column']
 
 -- Add user commands for main plugin functions
-vim.api.nvim_create_user_command("PrintHead", M.print_head, { desc = "Print the head of a data frame" })
-vim.api.nvim_create_user_command("PrintNames", M.print_names, { desc = "Print the column names of a data frame" })
+vim.api.nvim_create_user_command("PrintHead", M.print_head, { desc = "Print the head of an object" })
+vim.api.nvim_create_user_command("PrintNames", M.print_names, { desc = "Print the column names of an object" })
 
 return M
