@@ -43,15 +43,17 @@ local function get_quarto_language()
 
     -- Parse language information line and get document language
     local line = vim.split(vim.fn.getline(line_number), "%s+")
-    if line[1] == "engine:" then
-        if line[2] == "knitr" then
+    local engine_spec = line[1]
+    if engine_spec == "engine:" then
+        local engine = line[2]
+        if engine == "knitr" then
             return "r"
-        elseif line[2] == "jupyter" then
+        elseif engine == "jupyter" then
             return "python"
         end
-    elseif line[1] == "knitr:" then
+    elseif engine_spec == "knitr:" then
         return "r"
-    elseif line[1] == "jupyter:" then
+    elseif engine_spec == "jupyter:" then
         local kernel = line[2]
         if kernel == "python" or kernel == "python3" then
             return "python"
