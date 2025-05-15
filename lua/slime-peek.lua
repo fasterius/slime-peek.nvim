@@ -89,7 +89,17 @@ local function get_r_command(operation, object)
 end
 
 local function get_python_command(operation, object)
-    return object .. "." .. operation .. "()\\n"
+    -- Handle differing operation names between R and Python as well as whether
+    -- the command pertains to an attribute (without parentheses) or a method
+    -- (with parentheses)
+    local parentheses = "()"
+    if operation == "names" then
+        operation = "list"
+    elseif operation == "dim" then
+        operation = "shape"
+        parentheses = ""
+    end
+    return object .. "." .. operation .. parentheses .. "\\n"
 end
 
 -- Internal function to send a specific command to the REPL
@@ -105,10 +115,6 @@ local function send_command_to_repl(operation)
     if language == "r" then
         command = get_r_command(operation, word_under_cursor)
     elseif language == "python" then
-        -- Handle differing operation names between R and Python
-        if operation == "names" then
-            operation = "list"
-        end
         command = get_python_command(operation, word_under_cursor)
     end
 
@@ -133,10 +139,14 @@ function M.print_names()
     send_command_to_repl("names")
 end
 
+-- Function to print the dimensions of the data frame under the cursor
+function M.print_dimensions()
+    send_command_to_repl("dim")
+end
+
 -- TODO: Possible additions include
 --       - Classes of data frame columns
 --       - Summary of object
---       - Length / size of object
 --       - Extensions of the existing to work with individual columns, e.g.
 --         finding not just the word under the cursor but also df$column or
 --         df['column']
@@ -145,5 +155,6 @@ end
 vim.api.nvim_create_user_command("PrintHead", M.print_head, { desc = "Print the head of an object" })
 vim.api.nvim_create_user_command("PrintTail", M.print_tail, { desc = "Print the tail of an object" })
 vim.api.nvim_create_user_command("PrintNames", M.print_names, { desc = "Print the column names of an object" })
+vim.api.nvim_create_user_command("PrintDimensions", M.print_dimensions, { desc = "Print the dimensions of an object" })
 
 return M
