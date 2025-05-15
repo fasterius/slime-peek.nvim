@@ -14,6 +14,20 @@ local function set_cursor_position(position)
     vim.api.nvim_win_set_cursor(0, position)
 end
 
+-- Internal function to get the language of a code chunk
+local function get_chunk_language()
+    -- Get the chunk header by searching backwards from cursor position
+    local chunk_line = vim.fn.getline(vim.fn.search("^```{", "nbW"))
+
+    -- Parse the chunk and find the specified language
+    local language = chunk_line:match("^```{([%a]+)")
+    if language == "python" or language == "r" then
+        return language
+    else
+        return raise_error("Quarto language not found")
+    end
+end
+
 -- Internal function to get the language of the current Quarto document
 local function get_quarto_language()
     -- Store the current cursor position
@@ -28,7 +42,7 @@ local function get_quarto_language()
     -- Abort if no YAML header found
     if yaml_end_line == 0 then
         set_cursor_position(original_cursor_position)
-        return raise_error("YAML header not found")
+        return raise_error("YAML header not found; Quarto document is malformed")
     end
 
     -- Search through the YAML header and get the line with language information
@@ -36,9 +50,9 @@ local function get_quarto_language()
     local line_number = vim.fn.search(pattern, "nW", yaml_end_line)
     set_cursor_position(original_cursor_position)
 
-    -- Handle non-existant matches
+    -- Attempt to find chunk language if not specified in the YAML header
     if line_number == 0 then
-        return raise_error("Quarto language not found")
+        return get_chunk_language()
     end
 
     -- Parse language information line and get document language
