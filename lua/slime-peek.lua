@@ -23,11 +23,31 @@ end
 
 -- Internal function to get the language of a code chunk
 local function get_chunk_language()
-    -- Get the chunk header by searching backwards from cursor position
-    local chunk_line = vim.fn.getline(vim.fn.search("^```{", "nbW"))
+    -- Find a chunk start (header) backwards from the cursor position; if it
+    -- can't be found the cursor is outside a chunk at the beginning of the file
+    local start_backward = vim.fn.search("^```{", "nbW")
+    if start_backward == 0 then
+        return raise_error("Cannot find chunk header")
+    end
 
-    -- Parse the chunk and find the specified language
-    local language = chunk_line:match("^```{([%a]+)")
+    -- Find a chunk end forwards from the cursor position; if it can't be found
+    -- the cursor is outside a chunk at the end of the file
+    local end_forward = vim.fn.search("^```$", "nW")
+    if end_forward == 0 then
+        return raise_error("Cannot find chunk ending")
+    end
+
+    -- Find a chunk start forwards from the cursor position; if it's found and
+    -- is at a line number smaller than the previously found forward chunk end
+    -- the cursor is outside of a chunk
+    local start_forward = vim.fn.search("^```{", "nW")
+    if start_forward > 0 and start_forward < end_forward then
+        return raise_error("Cursor is not inside a valid code chunk")
+    end
+
+    -- Parse the chunk header and find the specified language
+    local chunk_header = vim.fn.getline(start_backward)
+    local language = chunk_header:match("^```{([%a]+)")
     if language == "python" or language == "r" then
         return language
     else
