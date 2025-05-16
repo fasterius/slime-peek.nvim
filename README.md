@@ -66,9 +66,18 @@ vim.keymap.set('n', '<localleader>h', require('slime-peek').peek_head)
 
 ## ⚙️ Configuration
 
-`slime-peek` works out-of-the-box and doesn't require any additional
-configuration. You might, however, want to configure keymaps and lazy loading in
-additional to the installation itself, which could look like this:
+`slime-peek` comes with the following options and their respective defaults:
+
+```lua
+{
+    -- Uses the Quarto YAML header for language detection instead of using the
+    -- current code chunk's language. This is useful if you want to specify
+    -- Quarto languages in a document-wide manner, rather than per code chunk.
+    use_yaml_header = false
+}
+```
+
+A complete installation and configuration might look something like this:
 
 ```lua
 {
@@ -83,12 +92,15 @@ additional to the installation itself, which could look like this:
     },
     config = function()
         local peek = require("slime-peek")
+        peek.setup({
+            use_yaml_language = false,
+        })
         vim.keymap.set("n", "<localleader>h", peek.peek_head)
         vim.keymap.set("n", "<localleader>T", peek.peek_tail)
         vim.keymap.set("n", "<localleader>n", peek.peek_names)
         vim.keymap.set("n", "<localleader>d", peek.peek_dimensions)
         vim.keymap.set("n", "<localleader>t", peek.peek_types)
-    end
+    end,
 }
 ```
 
@@ -111,10 +123,10 @@ The plugin will automatically detect which of the supported languages are
 currently in use in your document, whether that be Python or R scripts, R
 Markdown or Quarto documents. For scripts and R Markdown documents, the language
 is inferred by the file type, as those documents are only used with their
-respective programming language. For Quarto documents, it gives precedence to
-any language specification in the YAML header (using either `engine:`, `knitr:`
-or `jupyter:`). In cases where the language isn't specified in the Quarto YAML
-header it will instead search for the language in the current chunk header.
+respective programming language. For Quarto documents, `slime-peek` will check
+the current code chunk's language by default, with an option to instead use the
+language specified in the YAML header of the document (using either `engine:`,
+`knitr:` or `jupyter:`).
 
 This plugin was originally just a few functions living in my Neovim config, but
 I decided to formalise them into a plugin and share it with others. I hope you

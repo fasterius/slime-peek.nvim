@@ -1,7 +1,14 @@
 local M = {}
 
--- Setup
-function M.setup() end
+-- Default configuration
+M.opts = {
+    use_yaml_language = false,
+}
+
+-- Setup with options
+function M.setup(opts)
+    M.opts = vim.tbl_extend("force", M.opts, opts or {})
+end
 
 -- Internal function for handling errors with a message
 local function raise_error(message)
@@ -24,12 +31,12 @@ local function get_chunk_language()
     if language == "python" or language == "r" then
         return language
     else
-        return raise_error("Quarto language not found")
+        return raise_error("Quarto language '" .. language .. "' is not supported")
     end
 end
 
--- Internal function to get the language of the current Quarto document
-local function get_quarto_language()
+-- Local function to get the language from the Quarto YAML header
+local function get_yaml_language()
     -- Store the current cursor position
     local original_cursor_position = vim.api.nvim_win_get_cursor(0)
 
@@ -48,14 +55,16 @@ local function get_quarto_language()
     -- Search through the YAML header and get the line with language information
     local pattern = "^knitr:\\|^jupyter:\\|^engine:"
     local line_number = vim.fn.search(pattern, "nW", yaml_end_line)
+
+    -- Reset cursor position
     set_cursor_position(original_cursor_position)
 
-    -- Attempt to find chunk language if not specified in the YAML header
+    -- Raise error if no match is found
     if line_number == 0 then
-        return get_chunk_language()
+        return raise_error("Quarto language specification not found in YAML header")
     end
 
-    -- Parse language information line and get document language
+    -- Parse the engine specification line and return the language
     local line = vim.split(vim.fn.getline(line_number), "%s+")
     local engine_spec = line[1]
     if engine_spec == "engine:" then
@@ -64,6 +73,8 @@ local function get_quarto_language()
             return "r"
         elseif engine == "jupyter" then
             return "python"
+        else
+            return raise_error("Engine " .. engine .. " is not supported")
         end
     elseif engine_spec == "knitr:" then
         return "r"
@@ -77,7 +88,6 @@ local function get_quarto_language()
             return raise_error("Kernel '" .. kernel .. "' is not supported")
         end
     end
-    return raise_error("Quarto language not found")
 end
 
 -- Internal function to get the language of the current file
@@ -91,7 +101,11 @@ local function get_file_language()
     elseif filetype == "python" then
         return "python"
     elseif filetype == "quarto" then
-        return get_quarto_language()
+        if M.opts.use_yaml_language then
+            return get_yaml_language()
+        else
+            return get_chunk_language()
+        end
     else
         return raise_error("Filetype '" .. filetype .. "' is not supported")
     end
