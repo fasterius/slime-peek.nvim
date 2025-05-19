@@ -4,8 +4,7 @@ A Neovim plugin that adds several convenience functions for data exploration,
 allowing you to swiftly peek at your R and Python objects together with
 [vim-slime](https://github.com/jpalardy/vim-slime).
 
-<!-- TODO: Make a screencast to display as an example of plugin functionality. -->
-<!-- https://github.com/fasterius/simple-zoom.nvim/assets/12528765/354e67fa-5bc0-4aae-a41d-5f0440de21ff -->
+https://github.com/user-attachments/assets/8c4edeaa-859d-47d1-9f55-7dc70bc53a65
 
 ## ✨ Features
 
