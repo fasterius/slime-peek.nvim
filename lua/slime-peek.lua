@@ -161,6 +161,9 @@ end
 -- @object object the object to perform the operation on
 -- @return a string with the complete command
 local function get_python_command(operation, object)
+    if operation == "help" then
+        return operation .. "(" .. object .. ")\\n"
+    end
     local parentheses = "()"
     if operation == "names" then
         operation = "columns.tolist"
@@ -207,6 +210,9 @@ end
 function M.peek_types()
     send_command_to_repl("dtypes")
 end
+function M.peek_help()
+    send_command_to_repl("help")
+end
 
 -- Add user commands for main plugin functions
 vim.api.nvim_create_user_command("PeekHead", M.peek_head, { desc = "Print the head of an object" })
@@ -214,5 +220,6 @@ vim.api.nvim_create_user_command("PeekTail", M.peek_tail, { desc = "Print the ta
 vim.api.nvim_create_user_command("PeekNames", M.peek_names, { desc = "Print the column names of an object" })
 vim.api.nvim_create_user_command("PeekDimensions", M.peek_dimensions, { desc = "Print the dimensions of an object" })
 vim.api.nvim_create_user_command("PeekTypes", M.peek_types, { desc = "Print the column types of an object" })
+vim.api.nvim_create_user_command("PeekHelp", M.peek_help, { desc = "Print the help pages of an object" })
 
 return M
