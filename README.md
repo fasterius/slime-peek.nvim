@@ -44,6 +44,7 @@ The commands available are as follows:
 - `PeekNames`: Print the column header of the word under the cursor.
 - `PeekDimensions`: Print the dimensions of the word under the cursor.
 - `PeekTypes`: Print the data types of the columns of the word under the cursor.
+- `PeekHelp`: Print the help pages of the word under the cursor.
 
 If you want to create a key map for the commands, you can do something like
 this:
@@ -88,6 +89,7 @@ A complete installation and configuration might look something like this:
         { "<localleader>n" },
         { "<localleader>d" },
         { "<localleader>t" },
+        { "<localleader>H" },
     },
     config = function()
         local peek = require("slime-peek")
@@ -99,6 +101,7 @@ A complete installation and configuration might look something like this:
         vim.keymap.set("n", "<localleader>n", peek.peek_names)
         vim.keymap.set("n", "<localleader>d", peek.peek_dimensions)
         vim.keymap.set("n", "<localleader>t", peek.peek_types)
+        vim.keymap.set("n", "<localleader>H", peek.peek_help)
     end,
 }
 ```
