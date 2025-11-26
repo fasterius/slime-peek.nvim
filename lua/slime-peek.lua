@@ -206,17 +206,22 @@ local function get_text_from_operator_range()
     return string.sub(line, start_col, end_col)
 end
 
--- Initialise states
-M._command = nil
+--- Initialise states
+-- All states are changed in the user-facing functions; `_operator` is a
+-- boolean, while valid values for `_command` is specified by the user-facing
+-- functions.
 M._operator = false
+M._command = nil
 
 --- Send commands to the REPL
--- Get the word under the cursor, the file language and the command and send it
--- to the REPL. Does not return anything; errors are handled upstream.
--- @param operation the operation to send
+-- Get the text to be sent (either the word under the cursor or the text
+-- specified by the last operator/motion), the file language and the command and
+-- send it to the REPL. Does not return anything; errors are handled upstream.
+-- Uses states specified in `_operator` and `_command`.
 function M._send_command_to_repl()
     local language = get_file_language()
-    -- Get the text to send either from the word under the cursor or a motion
+    -- Get the text to send either from the word under the cursor or a
+    -- user-specified operator/motion
     local text
     if M._operator then
         text = get_text_from_operator_range()
@@ -237,9 +242,9 @@ function M._send_command_to_repl()
 end
 
 --- Send commands to the REPL using operator mode
--- Get the text from the user-specified motion/text object rather than the word
+-- Get the text from the user-specified operator/motion rather than the word
 -- under the cursor.
-function M.peek_with_operator()
+function M._send_command_to_repl_with_operator()
     vim.o.operatorfunc = "v:lua.require'slime-peek'._send_command_to_repl"
     vim.api.nvim_feedkeys("g@", "n", false)
 end
@@ -287,32 +292,32 @@ vim.api.nvim_create_user_command("PeekHelp", M.peek_help, { desc = "Print the he
 function M.peek_head_op()
     M._operator = true
     M._command = "head"
-    M.peek_with_operator()
+    M._send_command_to_repl_with_operator()
 end
 function M.peek_tail_op()
     M._operator = true
     M._command = "tail"
-    M.peek_with_operator()
+    M._send_command_to_repl_with_operator()
 end
 function M.peek_names_op()
     M._operator = true
     M._command = "names"
-    M.peek_with_operator()
+    M._send_command_to_repl_with_operator()
 end
 function M.peek_dims_op()
     M._operator = true
     M._command = "dim"
-    M.peek_with_operator()
+    M._send_command_to_repl_with_operator()
 end
 function M.peek_types_op()
     M._operator = true
     M._command = "dtypes"
-    M.peek_with_operator()
+    M._send_command_to_repl_with_operator()
 end
 function M.peek_help_op()
     M._operator = true
     M._command = "help"
-    M.peek_with_operator()
+    M._send_command_to_repl_with_operator()
 end
 
 vim.api.nvim_create_user_command("PeekHeadOp", M.peek_head_op, { desc = "Print the head of an object" })
