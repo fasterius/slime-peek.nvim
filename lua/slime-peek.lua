@@ -176,50 +176,158 @@ local function get_python_command(operation, object)
     return object .. "." .. operation .. parentheses .. "\\n"
 end
 
+-- Extract text from the last operator range.
+local function get_text_from_operator_range()
+    -- getpos() returns: {bufnum, lnum, col, off}
+    local start_pos = vim.fn.getpos("'[")
+    local end_pos = vim.fn.getpos("']")
+
+    local bufnr = start_pos[1]
+    local start_line = start_pos[2]
+    local start_col = start_pos[3]
+    local end_line = end_pos[2]
+    local end_col = end_pos[3]
+
+    if bufnr == 0 then
+        bufnr = vim.api.nvim_get_current_buf()
+    end
+
+    -- Lines are 1-based, end_line is inclusive
+    local lines = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)
+    if #lines == 0 then
+        return ""
+    -- Characterwise: trim first and last lines using the columns.
+    --
+    -- Note: columns from getpos() are 1-based and inclusive.
+    --       string.sub() is also 1-based inclusive.
+    --
+    -- First line: from start_col to end (or line length if single-line)
+    -- Last line:  from 1 to end_col
+    --
+    -- Multi-line selection:
+    --   - first line: from start_col to end
+    --   - middle lines: as-is
+    --   - last line: from 1 to end_col
+    elseif #lines == 1 then
+        lines[1] = string.sub(lines[1], start_col, end_col)
+    end
+    return table.concat(lines, "\n")
+end
+
+-- Initialise states
+M._command = nil
+M._operator = false
+
 --- Send commands to the REPL
 -- Get the word under the cursor, the file language and the command and send it
 -- to the REPL. Does not return anything; errors are handled upstream.
 -- @param operation the operation to send
-local function send_command_to_repl(operation)
-    local word_under_cursor = vim.fn.expand("<cword>")
+function M._send_command_to_repl()
     local language = get_file_language()
+    -- Get the text to send either from the word under the cursor or a motion
+    local text
+    if M._operator then
+        text = get_text_from_operator_range()
+    else
+        text = vim.fn.expand("<cword>")
+    end
+    -- Build the per-language command
     local command
     if language == "r" then
-        command = get_r_command(operation, word_under_cursor)
+        command = get_r_command(M._command, text)
     elseif language == "python" then
-        command = get_python_command(operation, word_under_cursor)
+        command = get_python_command(M._command, text)
     end
+    -- Send to the REPL
     if command then
         vim.cmd('SlimeSend0 "' .. command .. '"')
     end
 end
 
--- User-facing functions, one for each supported operation
-function M.peek_head()
-    send_command_to_repl("head")
-end
-function M.peek_tail()
-    send_command_to_repl("tail")
-end
-function M.peek_names()
-    send_command_to_repl("names")
-end
-function M.peek_dimensions()
-    send_command_to_repl("dim")
-end
-function M.peek_types()
-    send_command_to_repl("dtypes")
-end
-function M.peek_help()
-    send_command_to_repl("help")
+--- Send commands to the REPL using operator mode
+-- Get the text from the user-specified motion/text object rather than the word
+-- under the cursor.
+function M.peek_with_operator()
+    vim.o.operatorfunc = "v:lua.require'slime-peek'._send_command_to_repl"
+    vim.api.nvim_feedkeys("g@", "n", false)
 end
 
--- Add user commands for main plugin functions
+-- User-facing functions (word under cursor mode)
+function M.peek_head()
+    M._operator = false
+    M._command = "head"
+    M._send_command_to_repl()
+end
+function M.peek_tail()
+    M._operator = false
+    M._command = "tail"
+    M._send_command_to_repl()
+end
+function M.peek_names()
+    M._operator = false
+    M._command = "names"
+    M._send_command_to_repl()
+end
+function M.peek_dims()
+    M._operator = false
+    M._command = "dim"
+    M._send_command_to_repl()
+end
+function M.peek_types()
+    M._operator = false
+    M._command = "dtypes"
+    M._send_command_to_repl()
+end
+function M.peek_help()
+    M._operator = false
+    M._command = "help"
+    M._send_command_to_repl()
+end
+
 vim.api.nvim_create_user_command("PeekHead", M.peek_head, { desc = "Print the head of an object" })
 vim.api.nvim_create_user_command("PeekTail", M.peek_tail, { desc = "Print the tail of an object" })
 vim.api.nvim_create_user_command("PeekNames", M.peek_names, { desc = "Print the column names of an object" })
-vim.api.nvim_create_user_command("PeekDimensions", M.peek_dimensions, { desc = "Print the dimensions of an object" })
+vim.api.nvim_create_user_command("PeekDims", M.peek_dims, { desc = "Print the dimensions of an object" })
 vim.api.nvim_create_user_command("PeekTypes", M.peek_types, { desc = "Print the column types of an object" })
 vim.api.nvim_create_user_command("PeekHelp", M.peek_help, { desc = "Print the help pages of an object" })
+
+-- User-facing functions (operator mode)
+function M.peek_head_op()
+    M._operator = true
+    M._command = "head"
+    M.peek_with_operator()
+end
+function M.peek_tail_op()
+    M._operator = true
+    M._command = "tail"
+    M.peek_with_operator()
+end
+function M.peek_names_op()
+    M._operator = true
+    M._command = "names"
+    M.peek_with_operator()
+end
+function M.peek_dims_op()
+    M._operator = true
+    M._command = "dim"
+    M.peek_with_operator()
+end
+function M.peek_types_op()
+    M._operator = true
+    M._command = "dtypes"
+    M.peek_with_operator()
+end
+function M.peek_help_op()
+    M._operator = true
+    M._command = "help"
+    M.peek_with_operator()
+end
+
+vim.api.nvim_create_user_command("PeekHeadOp", M.peek_head_op, { desc = "Print the head of an object" })
+vim.api.nvim_create_user_command("PeekTailOp", M.peek_tail_op, { desc = "Print the tail of an object" })
+vim.api.nvim_create_user_command("PeekNamesOp", M.peek_names_op, { desc = "Print the column names of an object" })
+vim.api.nvim_create_user_command("PeekDimsOp", M.peek_dims_op, { desc = "Print the dimensions of an object" })
+vim.api.nvim_create_user_command("PeekTypesOp", M.peek_types_op, { desc = "Print the column types of an object" })
+vim.api.nvim_create_user_command("PeekHelpOp", M.peek_help_op, { desc = "Print the help pages of an object" })
 
 return M
