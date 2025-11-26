@@ -203,6 +203,9 @@ local function get_text_from_operator_range()
     -- Get the line contents and return the text specified by the start and end
     -- positions. The `nvim_buf_get_lines()` function is 0-based for the start
     local line = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)[1]
+    if not line then
+        return raise_error("Could not get line for operator range")
+    end
     return string.sub(line, start_col, end_col)
 end
 
