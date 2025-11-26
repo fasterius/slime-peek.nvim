@@ -252,36 +252,38 @@ function M._send_command_to_repl_with_operator()
     vim.api.nvim_feedkeys("g@", "n", false)
 end
 
+--- Helper function for user-facing functions
+-- Reduce code duplication by having all individual per-command user-facing
+-- functions call this function with the correct command and whether to use
+-- operator mode.
+local function peek_command(command, use_operator)
+    M._operator = use_operator
+    M._command = command
+    if use_operator then
+        M._send_command_to_repl_with_operator()
+    else
+        M._send_command_to_repl()
+    end
+end
+
 -- User-facing functions (word under cursor mode)
 function M.peek_head()
-    M._operator = false
-    M._command = "head"
-    M._send_command_to_repl()
+    peek_command("head", false)
 end
 function M.peek_tail()
-    M._operator = false
-    M._command = "tail"
-    M._send_command_to_repl()
+    peek_command("tail", false)
 end
 function M.peek_names()
-    M._operator = false
-    M._command = "names"
-    M._send_command_to_repl()
+    peek_command("names", false)
 end
 function M.peek_dims()
-    M._operator = false
-    M._command = "dim"
-    M._send_command_to_repl()
+    peek_command("dim", false)
 end
 function M.peek_types()
-    M._operator = false
-    M._command = "dtypes"
-    M._send_command_to_repl()
+    peek_command("dtypes", false)
 end
 function M.peek_help()
-    M._operator = false
-    M._command = "help"
-    M._send_command_to_repl()
+    peek_command("help", false)
 end
 
 vim.api.nvim_create_user_command("PeekHead", M.peek_head, { desc = "Print the head of an object" })
@@ -293,34 +295,22 @@ vim.api.nvim_create_user_command("PeekHelp", M.peek_help, { desc = "Print the he
 
 -- User-facing functions (operator mode)
 function M.peek_head_op()
-    M._operator = true
-    M._command = "head"
-    M._send_command_to_repl_with_operator()
+    peek_command("head", true)
 end
 function M.peek_tail_op()
-    M._operator = true
-    M._command = "tail"
-    M._send_command_to_repl_with_operator()
+    peek_command("tail", true)
 end
 function M.peek_names_op()
-    M._operator = true
-    M._command = "names"
-    M._send_command_to_repl_with_operator()
+    peek_command("names", true)
 end
 function M.peek_dims_op()
-    M._operator = true
-    M._command = "dim"
-    M._send_command_to_repl_with_operator()
+    peek_command("dim", true)
 end
 function M.peek_types_op()
-    M._operator = true
-    M._command = "dtypes"
-    M._send_command_to_repl_with_operator()
+    peek_command("dtypes", true)
 end
 function M.peek_help_op()
-    M._operator = true
-    M._command = "help"
-    M._send_command_to_repl_with_operator()
+    peek_command("help", true)
 end
 
 vim.api.nvim_create_user_command("PeekHeadOp", M.peek_head_op, { desc = "Print the head of an object" })
