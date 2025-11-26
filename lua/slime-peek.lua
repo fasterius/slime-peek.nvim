@@ -176,42 +176,34 @@ local function get_python_command(operation, object)
     return object .. "." .. operation .. parentheses .. "\\n"
 end
 
--- Extract text from the last operator range.
+--- Extract text from the last operator/motion range
+-- Extract the text given by the last user-specified operation/motion that is
+-- meant to be sent to the REPL.
+-- @return a string with the selected text
 local function get_text_from_operator_range()
-    -- getpos() returns: {bufnum, lnum, col, off}
+    -- Get the positions of the start and end of the last operator/motion
+    -- The `getpos()` function returns {bufnum, lnum, col, off}
     local start_pos = vim.fn.getpos("'[")
     local end_pos = vim.fn.getpos("']")
 
-    local bufnr = start_pos[1]
+    -- Lines are 1-based; columns are 1-based and inclusive
     local start_line = start_pos[2]
     local start_col = start_pos[3]
     local end_line = end_pos[2]
     local end_col = end_pos[3]
 
-    if bufnr == 0 then
-        bufnr = vim.api.nvim_get_current_buf()
+    -- Enforce single-line selection
+    if start_line ~= end_line then
+        raise_error("Multi-line selections are not supported")
     end
 
-    -- Lines are 1-based, end_line is inclusive
-    local lines = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)
-    if #lines == 0 then
-        return ""
-    -- Characterwise: trim first and last lines using the columns.
-    --
-    -- Note: columns from getpos() are 1-based and inclusive.
-    --       string.sub() is also 1-based inclusive.
-    --
-    -- First line: from start_col to end (or line length if single-line)
-    -- Last line:  from 1 to end_col
-    --
-    -- Multi-line selection:
-    --   - first line: from start_col to end
-    --   - middle lines: as-is
-    --   - last line: from 1 to end_col
-    elseif #lines == 1 then
-        lines[1] = string.sub(lines[1], start_col, end_col)
-    end
-    return table.concat(lines, "\n")
+    -- The function is always called from the current buffer
+    local bufnr = vim.api.nvim_get_current_buf()
+
+    -- Get the line contents and return the text specified by the start and end
+    -- positions. The `nvim_buf_get_lines()` function is 0-based for the start
+    local line = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)[1]
+    return string.sub(line, start_col, end_col)
 end
 
 -- Initialise states
