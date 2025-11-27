@@ -68,7 +68,7 @@
 >lua
      vim.keymap.set('n', '<localleader>n', ':PeekNames<CR>')
 <
- :PeekDimensions                                 *slime-peek.PeekDimensions*
+ :PeekDims                                             *slime-peek.PeekDims*
 
    This command prints the dimensions of the word currently under the cursor
    in whatever REPL is configured with the `vim-slime` plugin.
@@ -76,7 +76,7 @@
    If you want to create a key map for this command, you can do something like
    the following:
 >lua
-     vim.keymap.set('n', '<localleader>d', ':PeekDimensions<CR>')
+     vim.keymap.set('n', '<localleader>d', ':PeekDims<CR>')
 <
  :PeekTypes                                           *slime-peek.PeekTypes*
 
@@ -107,7 +107,7 @@
 
  1. CONFIGURATION      				   *slime-peek.configuration*
 
- hide_tabline (default: `false`)               *simple-zoom.use_yaml_language*
+ use_yaml_language (default: `false`)           *slime-peek.use_yaml_language*
 
    Uses the Quarto YAML header for language detection instead of using the
    current code chunk's language. This is useful if you want to specify Quarto
@@ -138,12 +138,12 @@
 >lua
      vim.keymap.set('n', '<localleader>n', require('slime-peek').peek_names())
 <
- peek_dimensions()                              *slime-peek.peek_dimensions*
+ peek_dims()                                          *slime-peek.peek_dims*
 
-   This is the plugin function that `PeekDimensions` calls to print the
+   This is the plugin function that `PeekDims` calls to print the
    dimensions of the word under the cursor. You can also use this in a keymap:
 >lua
-     vim.keymap.set('n', '<localleader>d', require('slime-peek').peek_dimensions())
+     vim.keymap.set('n', '<localleader>d', require('slime-peek').peek_dims())
 <
  peek_types()                                        *slime-peek.peek_types*
 
