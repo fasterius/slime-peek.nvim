@@ -125,12 +125,12 @@ function M.peek_help()
     peek_command("help", false)
 end
 
-vim.api.nvim_create_user_command("PeekHead", M.peek_head, { desc = "Print the head of an object" })
-vim.api.nvim_create_user_command("PeekTail", M.peek_tail, { desc = "Print the tail of an object" })
-vim.api.nvim_create_user_command("PeekNames", M.peek_names, { desc = "Print the column names of an object" })
-vim.api.nvim_create_user_command("PeekDims", M.peek_dims, { desc = "Print the dimensions of an object" })
-vim.api.nvim_create_user_command("PeekTypes", M.peek_types, { desc = "Print the column types of an object" })
-vim.api.nvim_create_user_command("PeekHelp", M.peek_help, { desc = "Print the help pages of an object" })
+vim.api.nvim_create_user_command("PeekHead", M.peek_head, { desc = "Print the head of a word" })
+vim.api.nvim_create_user_command("PeekTail", M.peek_tail, { desc = "Print the tail of a word" })
+vim.api.nvim_create_user_command("PeekNames", M.peek_names, { desc = "Print the column names of a word" })
+vim.api.nvim_create_user_command("PeekDims", M.peek_dims, { desc = "Print the dimensions of a word" })
+vim.api.nvim_create_user_command("PeekTypes", M.peek_types, { desc = "Print the column types of a word" })
+vim.api.nvim_create_user_command("PeekHelp", M.peek_help, { desc = "Print the help pages of a word" })
 
 -- User-facing functions (operator mode)
 function M.peek_head_op()
