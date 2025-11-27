@@ -35,8 +35,8 @@
 
  2. USAGE      						   *slime-peek.usage*
 
- This plugin does not export any key mappings, but supplies user-commands for
- its functionality:
+ This plugin does not export any key mappings, but supplies user-commands
+ (this section) or Lua functions (section 4) for its functionality:
 
  :PeekHead    			                       *slime-peek.PeekHead*
 
