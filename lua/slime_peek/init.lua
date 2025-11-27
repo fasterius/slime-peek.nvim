@@ -49,23 +49,23 @@ local function get_text_from_operator_range()
 end
 
 --- Initialise states
--- All states are changed in the user-facing functions; `_operator` is a
+-- All states are changed in the user-facing functions; `_use_operator` is a
 -- boolean, while valid values for `_command` is specified by the user-facing
 -- functions.
-M._operator = false
+M._use_operator = false
 M._command = nil
 
 --- Send commands to the REPL
 -- Get the text to be sent (either the word under the cursor or the text
 -- specified by the last operator/motion), the file language and the command and
 -- send it to the REPL. Does not return anything; errors are handled upstream.
--- Uses states specified in `_operator` and `_command`.
+-- Uses states specified in `_use_operator` and `_command`.
 function M._send_command_to_repl()
     local language = lang.get_file_language()
     -- Get the text to send either from the word under the cursor or a
     -- user-specified operator/motion
     local text
-    if M._operator then
+    if M._use_operator then
         text = get_text_from_operator_range()
     else
         text = vim.fn.expand("<cword>")
@@ -96,7 +96,7 @@ end
 -- functions call this function with the correct command and whether to use
 -- operator mode.
 local function peek_command(command, use_operator)
-    M._operator = use_operator
+    M._use_operator = use_operator
     M._command = command
     if use_operator then
         send_command_to_repl_with_operator()
