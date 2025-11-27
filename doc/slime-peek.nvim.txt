@@ -4,10 +4,12 @@
 
  Table of contents                             *slime-peek.table-of-contents*
 
- 1. Introduction 	         |slime-peek.introduction|
- 2. Usage		         |slime-peek.usage|
- 3. Configuration                |slime-peek.configuration|
- 4. Functions		         |slime-peek.functions|
+ 1. Introduction 	                           |slime-peek.introduction|
+ 2. Requirements                                   |slime-peek.requirements|
+ 3. Usage		                                  |slime-peek.usage|
+ 4. Configuration                                 |slime-peek.configuration|
+ 5. Commands		                               |slime-peek.commands|
+ 6. Keymaps                                             |slime-peek.keymaps|
 
 ==============================================================================
 
@@ -30,138 +32,139 @@
  the YAML header of the document (using either `engine:`, `knitr:` or
  `jupyter:`).
 
+==============================================================================
+
+ 2. REQUIREMENTS                                    *slime-peek.requirements*
+
+ This plugin assumes you have `vim-slime` configured and a running REPL in
+ e.g. a Tmux pane or a Neovim terminal; `slime-peek` only constructs and sends
+ commands, it does not manage the REPL itself.
 
 ==============================================================================
 
- 2. USAGE      						   *slime-peek.usage*
+ 3. USAGE      						   *slime-peek.usage*
 
- This plugin does not export any key mappings, but supplies user-commands
- (this section) or Lua functions (section 4) for its functionality:
+ The `slime-peek` plugin supplies several operations, each with two variants:
+ one that uses the word under the cursor, and one that uses Vim's
+ operator-pending mode (a motion or text object) to select the text. Each
+ word-based operation is named e.g. `peek_head`, while its motion equivalent
+ is named `peek_head_motion`. The motion variants will enter operator-pending
+ mode and wait for the user to supply a motion or a text object before sending
+ the final text to the REPL.
 
- :PeekHead    			                       *slime-peek.PeekHead*
+ For R, operations like `peek_head` translate to commands such as
+ `head(<text>)`. For Python, they are translated to attribute or method
+ accesses such as `<text>.head()`; see each function for details.
 
-   This command prints the head of the word currently under the cursor in
-   whatever REPL is configured with the `vim-slime` plugin.
+ peek_head                                            *slime-peek.peek_head*
+ peek_head_motion                              *slime-peek.peek_head_motion*
 
-   If you want to create a key map for this command, you can do something like
-   the following:
->lua
-     vim.keymap.set('n', '<localleader>h', ':PeekHead<CR>')
-<
- :PeekTail    		 	                       *slime-peek.PeekTail*
+   Send the "head" operation with some text to the REPL.
 
-   This command prints the tail of the word currently under the cursor in
-   whatever REPL is configured with the `vim-slime` plugin.
+   R:      `head(<text>)`
+   Python: `<text>.head()`
 
-   If you want to create a key map for this command, you can do something like
-   the following:
->lua
-     vim.keymap.set('n', '<localleader>T', ':PeekTail<CR>')
-<
- :PeekNames                                           *slime-peek.PeekNames*
+ peek_tail                                            *slime-peek.peek_tail*
+ peek_tail_motion                              *slime-peek.peek_tail_motion*
 
-   This command prints the column names of the word currently under the cursor
-   in whatever REPL is configured with the `vim-slime` plugin.
+   Send the "tail" operation with some text to the REPL.
 
-   If you want to create a key map for this command, you can do something like
-   the following:
->lua
-     vim.keymap.set('n', '<localleader>n', ':PeekNames<CR>')
-<
- :PeekDims                                             *slime-peek.PeekDims*
+   R:      `tail(<text>)`
+   Python: `<text>.tail()`
 
-   This command prints the dimensions of the word currently under the cursor
-   in whatever REPL is configured with the `vim-slime` plugin.
+ peek_names                                          *slime-peek.peek_names*
+ peek_names_motion                            *slime-peek.peek_names_motion*
 
-   If you want to create a key map for this command, you can do something like
-   the following:
->lua
-     vim.keymap.set('n', '<localleader>d', ':PeekDims<CR>')
-<
- :PeekTypes                                           *slime-peek.PeekTypes*
+   Send the "column names" operation with some text to the REPL.
 
-   This command prints the data types or classes of the columns of the word
-   currently under the cursor in whatever REPL is configured with the
-   `vim-slime` plugin.
+   R:      `names(<text>)`
+   Python: `<text>.columns.tolist()`
 
-   If you want to create a key map for this command, you can do something like
-   the following:
->lua
-     vim.keymap.set('n', '<localleader>t', ':PeekTypes<CR>')
-<
- :PeekHelp                                             *slime-peek.PeekHelp*
+ peek_dims                                            *slime-peek.peek_dims*
+ peek_dims_motion                              *slime-peek.peek_dims_motion*
 
-   This command prints the help pages for the word currently under the cursor
-   in whatever REPL is configured with the `vim-slime` plugin.
+   Send the "object dimensions" operation with some text to the REPL.
 
-   If you want to create a key map for this command, you can do something like
-   the following:
->lua
-     vim.keymap.set('n', '<localleader>H', ':PeekHelp<CR>')
-<
+   R:      `dim(<text>)`
+   Python: `<text>.shape`
+
+ peek_types                                          *slime-peek.peek_types*
+ peek_types_motion                            *slime-peek.peek_types_motion*
+
+   Send the "data types/classes" operation with some text to the REPL.
+
+   R:      `sapply(<text>, class)`
+   Python: `<text>.dtypes`
+
+ peek_help                                            *slime-peek.peek_help*
+ peek_help_motion                              *slime-peek.peek_help_motion*
+
+   Send the "help" operation with some text to the REPL.
+
+   R:      `help(<text>)`
+   Python: `help(<text>)`
+
    The output of this may be paginated depending on your terminal settings, so
    you might also need to either move to the REPL and press `q` to exit the
    pagination or create an additional keymap to send `q` to the REPL.
 
 ==============================================================================
 
- 1. CONFIGURATION      				   *slime-peek.configuration*
+ 4. CONFIGURATION      				   *slime-peek.configuration*
 
  use_yaml_language (default: `false`)           *slime-peek.use_yaml_language*
 
-   Uses the Quarto YAML header for language detection instead of using the
+   Use the Quarto YAML header for language detection instead of using the
    current code chunk's language. This is useful if you want to specify Quarto
    languages in a document-wide manner, rather than per code chunk.
 
 ==============================================================================
 
- 4. FUNCTIONS 					       *slime-peek.functions*
+ 5. COMMANDS 					        *slime-peek.commands*
 
- peek_head()                                          *slime-peek.peek_head*
+ The following user-commands correspond directly to the Lua functions
+ described in |slime-peek.usage|. The Lua functions are the recommended
+ interface for most cases, especially keymaps, but these commands are useful
+ for experimentation and learning.
 
-   This is the plugin function that `PeekHead` calls to print the head of the
-   word under the cursor. You can also use this in a keymap:
+ :PeekHead    			                       *slime-peek.PeekHead*
+ :PeekHeadMotion                                 *slime-peek.PeekHeadMotion*
+   Equivalent to |slime-peek.peek_head| and |slime-peek.peek_head_motion|.
+
+ :PeekTail    		 	                       *slime-peek.PeekTail*
+ :PeekTailMotion                                 *slime-peek.PeekTailMotion*
+   Equivalent to |slime-peek.peek_tail| and |slime-peek.peek_tail_motion|.
+
+ :PeekNames                                           *slime-peek.PeekNames*
+ :PeekNamesMotion                               *slime-peek.PeekNamesMotion*
+   Equivalent to |slime-peek.peek_names| and |slime-peek.peek_names_motion|.
+
+ :PeekDims                                             *slime-peek.PeekDims*
+ :PeekDimsMotion                                 *slime-peek.PeekDimsMotion*
+   Equivalent to |slime-peek.peek_dims| and |slime-peek.peek_dims_motion|.
+
+ :PeekTypes                                           *slime-peek.PeekTypes*
+ :PeekTypesMotion                               *slime-peek.PeekTypesMotion*
+   Equivalent to |slime-peek.peek_types| and |slime-peek.peek_types_motion|.
+
+ :PeekHelp                                             *slime-peek.PeekHelp*
+ :PeekHelpMotion                                 *slime-peek.PeekHelpMotion*
+   Equivalent to |slime-peek.peek_help| and |slime-peek.peek_help_motion|.
+
+==============================================================================
+
+ 6. KEYMAPS 					         *slime-peek.keymaps*
+
+ This plugin does not export any key mappings, but exposes Lua functions
+ (|slime-peek.usage|) and user-commands (|slime-peek.commands|), which you can
+ map yourself. For example:
 >lua
-     vim.keymap.set('n', '<localleader>h', require('slime-peek').peek_head())
+     -- Lua functions
+     local peek = require("slime_peek")
+     vim.keymap.set('n', '<localleader>h', peek.peek_head)
+     vim.keymap.set('n', '<localleader>mh', peek.peek_head_motion)
+     -- User-commands
+     vim.keymap.set('n', '<localleader>h', ':PeekHead<CR>')
+     vim.keymap.set('n', '<localleader>mh', ':PeekHeadMotion<CR>')
 <
- peek_tail()                                          *slime-peek.peek_tail*
-
-   This is the plugin function that `PeekTail` calls to print the tail of the
-   word under the cursor. You can also use this in a keymap:
->lua
-     vim.keymap.set('n', '<localleader>T', require('slime-peek').peek_tail())
-<
- peek_names()                                        *slime-peek.peek_names*
-
-   This is the plugin function that `PeekNames` calls to print the column
-   names of the word under the cursor. You can also use this in a keymap:
->lua
-     vim.keymap.set('n', '<localleader>n', require('slime-peek').peek_names())
-<
- peek_dims()                                          *slime-peek.peek_dims*
-
-   This is the plugin function that `PeekDims` calls to print the
-   dimensions of the word under the cursor. You can also use this in a keymap:
->lua
-     vim.keymap.set('n', '<localleader>d', require('slime-peek').peek_dims())
-<
- peek_types()                                        *slime-peek.peek_types*
-
-   This is the plugin function that `PeekTypes` calls to print the data types
-   or classes of the columns of the word under the cursor. You can also use
-   this in a keymap:
->lua
-     vim.keymap.set('n', '<localleader>t', require('slime-peek').peek_types())
-<
- peek_help()                                          *slime-peek.peek_help*
-
-   This is the plugin function that `PeekHelp` calls to print the help pages
-   of the word under the cursor. You can also use this in a keymap:
->lua
-     vim.keymap.set('n', '<localleader>H', require('slime-peek').peek_help())
-<
-   The output of this may be paginated depending on your terminal settings, so
-   you might also need to either move to the REPL and press `q` to exit the
-   pagination or create an additional keymap to send `q` to the REPL.
-
  vim:tw=78:ts=8:noet:ft=help:norl:
