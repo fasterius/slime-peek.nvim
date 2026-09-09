@@ -87,6 +87,8 @@ function M._send_command_to_repl()
         command = commands.get_r_command(M._command, text)
     elseif language == "python" then
         command = commands.get_python_command(M._command, text)
+    elseif language == "julia" then
+        command = commands.get_julia_command(M._command, text)
     end
     -- Send to the REPL
     if command then

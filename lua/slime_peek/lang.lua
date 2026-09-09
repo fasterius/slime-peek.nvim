@@ -32,7 +32,7 @@ local function get_chunk_language()
     -- Parse the chunk header and find the specified language
     local chunk_header = vim.fn.getline(start_backward)
     local language = chunk_header:match("^```{([%a]+)")
-    if language == "python" or language == "r" then
+    if language == "python" or language == "r" or language == "julia" then
         return language
     else
         return util.raise_error("Quarto language '" .. language .. "' is not supported")
@@ -91,6 +91,8 @@ local function get_yaml_language()
             return "python"
         elseif kernel == "r" then
             return "r"
+        elseif kernel == "julia" or kernel:match("^julia%-") then
+            return "julia"
         else
             return util.raise_error("Kernel '" .. kernel .. "' is not supported")
         end
@@ -111,6 +113,8 @@ function M.get_file_language(use_yaml_language)
         return "r"
     elseif filetype == "python" then
         return "python"
+    elseif filetype == "julia" then
+        return "julia"
     elseif filetype == "quarto" then
         if use_yaml_language then
             return get_yaml_language()

@@ -16,16 +16,14 @@
  1. INTRODUCTION      				    *slime-peek.introduction*
 
  The aim of this plugin is to add convenience functions for data exploration
- tasks when using `vim-slime` with Python and R, such as quickly peeking at
- the head or column names of a data frame.
+ tasks when using `vim-slime` with Python, R and Julia, such as quickly
+ peeking at the head or column names of a data frame.
 
- The plugin will automatically detect which of the supported languages are
- currently in use in your document, whether that be Python or R scripts, R
- Markdown or Quarto documents.
+ The plugin detects Python, R and Julia scripts, R Markdown, and Quarto
+ documents.
 
- For scripts and R Markdown documents, the language is inferred by the file
- type, as those documents are only used with their respective programming
- language.
+ For scripts and R Markdown documents, the language is inferred from the file
+ type.
 
  For Quarto documents, `slime-peek` will check the current code chunk's
  language by default, with an option to instead use the language specified in
@@ -52,57 +50,61 @@
  mode and wait for the user to supply a motion or a text object before sending
  the final text to the REPL.
 
- For R, operations like `peek_head` translate to commands such as
- `head(<text>)`. For Python, they are translated to attribute or method
- accesses such as `<text>.head()`; see each function for details.
+ For Python, operations like `peek_head` translate to attribute or method
+ accesses such as `<text>.head()`. The equivalent is `head(<text>)` for R and
+ `first(<text>, 5)` for Julia; see each function for details.
 
  peek_head                                            *slime-peek.peek_head*
  peek_head_motion                              *slime-peek.peek_head_motion*
 
    Send the "head" operation with some text to the REPL.
 
-   R:      `head(<text>)`
    Python: `<text>.head()`
+   R:      `head(<text>)`
+   Julia:  `first(<text>, 5)`
 
  peek_tail                                            *slime-peek.peek_tail*
  peek_tail_motion                              *slime-peek.peek_tail_motion*
 
    Send the "tail" operation with some text to the REPL.
 
-   R:      `tail(<text>)`
    Python: `<text>.tail()`
+   R:      `tail(<text>)`
+   Julia:  `last(<text>, 5)`
 
  peek_names                                          *slime-peek.peek_names*
  peek_names_motion                            *slime-peek.peek_names_motion*
 
    Send the "column names" operation with some text to the REPL.
 
-   R:      `names(<text>)`
    Python: `<text>.columns.tolist()`
+   R:      `names(<text>)`
+   Julia:  `names(<text>)`
 
  peek_dims                                            *slime-peek.peek_dims*
  peek_dims_motion                              *slime-peek.peek_dims_motion*
 
    Send the "object dimensions" operation with some text to the REPL.
 
-   R:      `dim(<text>)`
    Python: `<text>.shape`
-
+   R:      `dim(<text>)`
+   Julia:  `size(<text>)`
  peek_types                                          *slime-peek.peek_types*
  peek_types_motion                            *slime-peek.peek_types_motion*
 
    Send the "data types/classes" operation with some text to the REPL.
 
-   R:      `sapply(<text>, class)`
    Python: `<text>.dtypes`
-
+   R:      `sapply(<text>, class)`
+   Julia:  `eltype.(eachcol(<text>))`
  peek_help                                            *slime-peek.peek_help*
  peek_help_motion                              *slime-peek.peek_help_motion*
 
    Send the "help" operation with some text to the REPL.
 
-   R:      `help(<text>)`
    Python: `help(<text>)`
+   R:      `help(<text>)`
+   Julia:  `@doc <text>`
 
    The output of this may be paginated depending on your terminal settings, so
    you might also need to either move to the REPL and press `q` to exit the

@@ -1,7 +1,7 @@
 # 👀 Slime-peek
 
 A Neovim plugin that adds several convenience functions for data exploration,
-allowing you to swiftly peek at your R and Python objects together with
+allowing you to peek at your Python, R and Julia objects together with
 [vim-slime](https://github.com/jpalardy/vim-slime).
 
 https://github.com/user-attachments/assets/33bbf53f-597a-4f07-b8a2-32db9061b7ed
@@ -14,8 +14,8 @@ https://github.com/user-attachments/assets/33bbf53f-597a-4f07-b8a2-32db9061b7ed
 - Peek at the data types / classes of the columns of the word under the cursor
 - Operator/motion-based variants of the above that work on arbitrary expressions
   (_e.g._ `df$col`, slices, _etc._)
-- Automatic language- and file type-detection for R and Python across scripts, R
-  Markdown and Quarto
+- Automatic language and file type detection for Python, R and Julia across
+  scripts, R Markdown, and Quarto
 
 ## 📚 Requirements
 
@@ -43,12 +43,12 @@ named e.g. `peek_head`, while its motion equivalent is named `peek_head_motion`.
 The motion variants will enter operator-pending mode and wait for the user to
 supply a motion or a text object before sending the final text to the REPL.
 
-For R, operations like `peek_head` translate to commands such as `head(<text>)`.
-For Python, they are translated to attribute or method accesses such as
-`<text>.head()`; please see [the documentation](doc/slime-peek.nvim.txt) for
-details. The plugin will automatically detect which language you are working
-with, whether that be R / Python scripts or R Markdown / Quarto documents and
-send the appropriate code using `vim-slime`.
+For Python, operations like `peek_head` translate to attribute or method
+accesses such as `<text>.head()`. The equivalent is `head(<text>)` for R and
+`first(<text>, 5)` for Julia; see [the documentation](doc/slime-peek.nvim.txt)
+for details. The plugin detects Python, R and Julia scripts as well as R
+Markdown and Quarto documents, then sends the appropriate code using
+`vim-slime`.
 
 `slime-peek` does not set any key mappings by default, but instead provides
 several Lua functions and user-commands that you can set key binds for:
@@ -93,7 +93,7 @@ can be useful for experimentation and are used in the demo above.
     -- Uses the Quarto YAML header for language detection instead of using the
     -- current code chunk's language. This is useful if you want to specify
     -- Quarto languages in a document-wide manner, rather than per code chunk.
-    use_yaml_header = false
+    use_yaml_language = false
 }
 ```
 
@@ -132,17 +132,17 @@ A complete installation and configuration might look something like this:
 
 ## 📕 About
 
-If you already perform data exploration and/or analyses using R / Python, Neovim
-and [vim-slime](https://github.com/jpalardy/vim-slime) (or if you'd like to
-start doing so), `slime-peek.nvim` is for you! The aim of this plugin is to
-provide convenient ways for simple data exploration tasks while working with a
-REPL using the `vim-slime` plugin. The tasks include things such as looking at
-the head of a data frame or the column names of a data frame. These are not
-complex tasks, but it is convenient to have them a shortcut away when working on
-_e.g._ a Quarto document with some data analysis project.
+If you already perform data exploration and/or analyses using Python / R /
+Julia, Neovim and [vim-slime](https://github.com/jpalardy/vim-slime) (or if
+you'd like to start doing so), `slime-peek.nvim` is for you! The aim of this
+plugin is to provide convenient ways for simple data exploration tasks while
+working with a REPL using the `vim-slime` plugin. The tasks include things such
+as looking at the head of a data frame or the column names of a data frame.
+These are not complex tasks, but it is convenient to have them a shortcut away
+when working on _e.g._ a Quarto document with some data analysis project.
 
 The plugin will automatically detect which of the supported languages are
-currently in use in your document, whether that be Python or R scripts, R
+currently in use in your document, whether that be Python, R or Julia scripts, R
 Markdown or Quarto documents. For scripts and R Markdown documents, the language
 is inferred by the file type, as those documents are only used with their
 respective programming language. For Quarto documents, `slime-peek` will check

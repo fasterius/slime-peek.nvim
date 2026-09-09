@@ -1,8 +1,8 @@
 local M = {}
 
 ---Handle R-specific commands
----Handle differing operation names between R and Python as well as whether the
----operation is a non-trivial function call with extra code.
+---Handle differing operation names between supported languages as well as
+---whether the operation is a non-trivial function call with extra code.
 ---@param operation string the operation to perform
 ---@param object string the object to perform the operation on
 ---@return string command the complete command
@@ -16,9 +16,9 @@ function M.get_r_command(operation, object)
 end
 
 ---Handle Python-specific commands
----Handle differing operation names between R and Python as well as whether the
----command pertains to an attribute (without parentheses) or a method (with
----parentheses)
+---Handle differing operation names between supported languages as well as
+---whether the command pertains to an attribute (without parentheses) or a
+---method (with parentheses)
 ---@param operation string the operation to perform
 ---@param object string the object to perform the operation on
 ---@return string command the complete command
@@ -36,6 +36,26 @@ function M.get_python_command(operation, object)
         parentheses = ""
     end
     return object .. "." .. operation .. parentheses .. "\\n"
+end
+
+---Handle Julia-specific commands
+---Translate the common operation names to Julia and DataFrames.jl expressions.
+---@param operation string the operation to perform
+---@param object string the object to perform the operation on
+---@return string command the complete command
+function M.get_julia_command(operation, object)
+    if operation == "head" then
+        return "first(" .. object .. ", 5)\\n"
+    elseif operation == "tail" then
+        return "last(" .. object .. ", 5)\\n"
+    elseif operation == "dim" then
+        return "size(" .. object .. ")\\n"
+    elseif operation == "dtypes" then
+        return "eltype.(eachcol(" .. object .. "))\\n"
+    elseif operation == "help" then
+        return "@doc " .. object .. "\\n"
+    end
+    return operation .. "(" .. object .. ")\\n"
 end
 
 return M

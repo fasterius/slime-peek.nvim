@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Julia support for scripts and Quarto documents, including Julia command
+  generation and Jupyter kernel detection.
+
 ## [1.2.1] - 2026-09-01
 
 ### Fixed
