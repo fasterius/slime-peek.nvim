@@ -65,6 +65,81 @@ local function get_yaml_lines()
     return vim.api.nvim_buf_get_lines(0, 1, yaml_end_line - 1, false)
 end
 
+---Parse YAML specification stored in table and return language specifications
+---stored therein, if any
+---@param lines table
+---@return table
+local function parse_yaml_table(lines)
+    -- Loop over YAML header table and store relevant information
+    local yaml = {}
+    for i, line in ipairs(lines) do
+        -- Check if line matches either of the possible language specifications
+        -- Pattern works even for lines like `^knitr:$` with nothing after it,
+        -- as it returns "" (empty string), which is truthy for later checks
+        -- against e.g. `if yaml.knitr then ...`
+        local jupyter = line:match("^jupyter:%s*(.*)$")
+        local knitr = line:match("^knitr:%s*(.*)$")
+        local engine = line:match("^engine:%s*(.*)$")
+
+        -- Check which language specifications exist, with priority given to
+        -- jupyter and knitr over engine
+        if jupyter then
+            -- Short-form (single line) jupyter kernel specification (is an
+            -- empty string for full kernelspecs)
+            yaml["jupyter"] = jupyter
+            -- Check for complete kernelspec
+            if jupyter == "" then
+                local kernelspec = lines[i + 1]:match("^%s*kernelspec:$")
+                if kernelspec then
+                    -- Loop across all lines below the `kernelspec` line
+                    for j = i + 2, #lines do
+                        local language = lines[j]:match("^%s*language:%s*(.*)$")
+                        local name = lines[j]:match("^%s*name:%s*(.*)$")
+                        if language then
+                            yaml["language"] = language:lower()
+                        end
+                        if name then
+                            yaml["name"] = name:lower()
+                        end
+                    end
+                end
+            end
+        -- Knitr can be both short-form and nested, but makes no difference to
+        -- language specification, so no conditional is needed here
+        elseif knitr then
+            yaml["knitr"] = knitr
+        elseif engine then
+            yaml["engine"] = engine
+        end
+    end
+    return yaml
+end
+
+-- Allowed kernel languages
+local KERNEL_LANGUAGES = {
+    python = "python",
+    python3 = "python",
+    r = "r",
+    ir = "r",
+    julia = "julia",
+}
+
+---Resolve a Jupyter kernel name to a language
+---@param kernel string
+---@return string|nil language
+local function get_language_from_kernel(kernel)
+    local language = KERNEL_LANGUAGES[kernel]
+    -- Direct match
+    if language then
+        return language
+    end
+    -- Julia can uniquely be specified with `julia-[version]`
+    if kernel:match("^julia%-") then
+        return "julia"
+    end
+    return util.raise_error("Kernel '" .. kernel .. "' is not supported")
+end
+
 ---Get YAML header language
 ---Check that the YAML header exists, is properly formatted and contains a
 ---language specification; return the language if this is the case.
@@ -76,19 +151,8 @@ local function get_yaml_language()
         return
     end
 
-    -- Loop over YAML header table and store relevant information
-    local yaml = {}
-    for _, line in ipairs(yaml_lines) do
-        for _, key in ipairs({ "jupyter", "knitr", "engine" }) do
-            -- Pattern works even for lines like `^knitr:$` with nothing after
-            -- it, as it returns "" (empty string), which is truthy for later
-            -- checks against e.g. `if yaml.knitr then ...`
-            local value = line:match("^" .. key .. ":%s*(.*)$")
-            if value then
-                yaml[key] = value
-            end
-        end
-    end
+    -- Parse YAML table
+    local yaml = parse_yaml_table(yaml_lines)
 
     -- Raise error if no match is found
     if not (yaml.engine or yaml.jupyter or yaml.knitr) then
@@ -99,6 +163,7 @@ local function get_yaml_language()
     if yaml.knitr then
         return "r"
     elseif yaml.jupyter then
+        -- Short-form jupyter
         if yaml.jupyter == "python" or yaml.jupyter == "python3" then
             return "python"
         elseif yaml.jupyter == "r" then
@@ -106,13 +171,22 @@ local function get_yaml_language()
         elseif yaml.jupyter == "julia" or yaml.jupyter:match("^julia%-") then
             return "julia"
         elseif yaml.jupyter == "" then
-            return util.raise_error("Kernel specification is empty")
+            -- Full kernelspec, prioritising `language` over `name`
+            if yaml.language or yaml.name then
+                if yaml.language then
+                    return get_language_from_kernel(yaml.language)
+                elseif yaml.name then
+                    return get_language_from_kernel(yaml.name)
+                end
+            else
+                return util.raise_error("Kernel field is empty, without a full kernelspec")
+            end
         else
             return util.raise_error("Kernel '" .. yaml.jupyter .. "' is not supported")
         end
     elseif yaml.engine then
         if yaml.engine == "jupyter" then
-            return util.raise_error("Engine specifies 'jupyter' without language")
+            return util.raise_error("Engine specifies 'jupyter' without a full kernelspec")
         elseif yaml.engine == "knitr" then
             return "r"
         elseif yaml.engine == "" then
