@@ -68,7 +68,7 @@ end
 ---Scan an indented block for presence of fields and their values, returning
 ---both the YAML table with the fields/values added, as well as the index at
 ---which the field matched. Stop scanning when reaching a lower indentation
----level, but ignores blank lines.
+---level, but ignore blank lines.
 ---@param start integer
 ---@param lines table
 ---@param yaml table
@@ -144,8 +144,8 @@ local function parse_yaml_table(lines)
     return yaml
 end
 
--- Allowed kernel languages
-local KERNEL_LANGUAGES = {
+-- Allowed languages and their identifiers
+local LANGUAGE_IDENTIFIERS = {
     python = "python",
     python3 = "python",
     r = "r",
@@ -153,20 +153,20 @@ local KERNEL_LANGUAGES = {
     julia = "julia",
 }
 
----Resolve a Jupyter kernel name to a language
----@param kernel string
+---Resolve an identifier name to a Jupyter language
+---@param identifier string
 ---@return string|nil language
-local function get_language_from_kernel(kernel)
-    local language = KERNEL_LANGUAGES[kernel]
+local function get_language_from_identifier(identifier)
+    local language = LANGUAGE_IDENTIFIERS[identifier]
     -- Direct match
     if language then
         return language
     end
     -- Julia can uniquely be specified with `julia-[version]`
-    if kernel:match("^julia%-") then
+    if identifier:match("^julia%-") then
         return "julia"
     end
-    return util.raise_error("Kernel '" .. kernel .. "' is not supported")
+    return util.raise_error("'" .. identifier .. "' is not supported")
 end
 
 ---Get YAML header language
@@ -203,9 +203,9 @@ local function get_yaml_language()
             -- Full kernelspec, prioritising `language` over `name`
             if yaml.language or yaml.name then
                 if yaml.language then
-                    return get_language_from_kernel(yaml.language)
+                    return get_language_from_identifier(yaml.language)
                 elseif yaml.name then
-                    return get_language_from_kernel(yaml.name)
+                    return get_language_from_identifier(yaml.name)
                 end
             else
                 return util.raise_error("Kernel field is empty, without a full kernelspec")
