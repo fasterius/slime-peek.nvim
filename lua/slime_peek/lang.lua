@@ -89,17 +89,44 @@ local function parse_yaml_table(lines)
             yaml["jupyter"] = jupyter
             -- Check for complete kernelspec
             if jupyter == "" then
-                local kernelspec = lines[i + 1]:match("^%s*kernelspec:$")
-                if kernelspec then
-                    -- Loop across all lines below the `kernelspec` line
-                    for j = i + 2, #lines do
-                        local language = lines[j]:match("^%s*language:%s*(.*)$")
-                        local name = lines[j]:match("^%s*name:%s*(.*)$")
-                        if language then
-                            yaml["language"] = language:lower()
-                        end
-                        if name then
-                            yaml["name"] = name:lower()
+                -- Initialise outer indentation counter
+                local indent_outer = 0
+                -- Loop across lines below the `jupyter:` line
+                for j = i + 1, #lines do
+                    -- Skip empty lines
+                    if not lines[j]:match("^$") then
+                        local current_indent_outer = #lines[j]:match("^(%s*)")
+                        if current_indent_outer >= indent_outer then
+                            indent_outer = current_indent_outer
+                            local kernelspec = lines[j]:match("^%s*kernelspec:$")
+                            if kernelspec then
+                                -- Initialise inner indentation counter
+                                local indent_inner = 0
+                                -- Loop across lines below the `kernelspec:` line
+                                for k = j + 1, #lines do
+                                    -- Skip empty lines
+                                    if not lines[k]:match("^$") then
+                                        local current_indent_inner = #lines[k]:match("^(%s*)")
+                                        if current_indent_inner >= indent_inner then
+                                            indent_inner = current_indent_inner
+                                            local language = lines[k]:match("^%s*language:%s*(.*)$")
+                                            local name = lines[k]:match("^%s*name:%s*(.*)$")
+                                            if language then
+                                                yaml["language"] = language:lower()
+                                            end
+                                            if name then
+                                                yaml["name"] = name:lower()
+                                            end
+                                        else
+                                            -- Stop parsing with decreased indentation
+                                            break
+                                        end
+                                    end
+                                end
+                            end
+                        else
+                            -- Stop parsing with decreased indentation
+                            break
                         end
                     end
                 end
