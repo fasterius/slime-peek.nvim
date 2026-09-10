@@ -82,7 +82,7 @@ local function scan_yaml_block(start, lines, yaml, fields)
     -- Loop across lines
     for i = start, #lines do
         -- Skip empty lines
-        if not lines[i]:match("^$") then
+        if not lines[i]:match("^%s*$") then
             local current_indent_level = #lines[i]:match("^(%s*)")
             if current_indent_level >= indent_level then
                 indent_level = current_indent_level
