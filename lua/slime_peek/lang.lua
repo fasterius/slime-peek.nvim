@@ -105,15 +105,21 @@ local function get_yaml_language()
             return "r"
         elseif yaml.jupyter == "julia" or yaml.jupyter:match("^julia%-") then
             return "julia"
+        elseif yaml.jupyter == "" then
+            return util.raise_error("Kernel specification is empty")
         else
             return util.raise_error("Kernel '" .. yaml.jupyter .. "' is not supported")
         end
-    elseif yaml.engine == "jupyter" then
-        return "python"
-    elseif yaml.engine == "knitr" then
-        return "r"
-    else
-        return util.raise_error("Engine '" .. yaml.engine .. "' is not supported")
+    elseif yaml.engine then
+        if yaml.engine == "jupyter" then
+            return util.raise_error("Engine specifies 'jupyter' without language")
+        elseif yaml.engine == "knitr" then
+            return "r"
+        elseif yaml.engine == "" then
+            return util.raise_error("Engine specification is empty")
+        else
+            return util.raise_error("Engine '" .. yaml.engine .. "' is not supported")
+        end
     end
 end
 
