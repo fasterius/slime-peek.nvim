@@ -228,8 +228,7 @@ end
 
 ---Get language for current file
 ---Check the current filetype and gets the corresponding language as appropriate
----@param use_yaml_language boolean|nil whether to use the Quarto YAML header for
----language detection instead of the current code chunk's language
+---@param use_yaml_language boolean|nil
 ---@return string|nil language
 function M.get_file_language(use_yaml_language)
     -- Access the filetype of the current buffer
