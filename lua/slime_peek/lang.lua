@@ -65,8 +65,45 @@ local function get_yaml_lines()
     return vim.api.nvim_buf_get_lines(0, 1, yaml_end_line - 1, false)
 end
 
----Parse YAML specification stored in table and return language specifications
----stored therein, if any
+---Scan an indented block for presence of fields and their values, returning
+---both the YAML table with the fields/values added, as well as the index at
+---which the field matched. Stop scanning when reaching a lower indentation
+---level, but ignores blank lines.
+---@param start integer
+---@param lines table
+---@param yaml table
+---@param fields table
+---@return table, integer|nil
+local function scan_yaml_block(start, lines, yaml, fields)
+    -- Initialise indentation counter
+    local indent_level = 0
+    -- Initialise index of matched pattern
+    local matched_at = nil
+    -- Loop across lines
+    for i = start, #lines do
+        -- Skip empty lines
+        if not lines[i]:match("^$") then
+            local current_indent_level = #lines[i]:match("^(%s*)")
+            if current_indent_level >= indent_level then
+                indent_level = current_indent_level
+                -- Add fields to the output YAML as appropriate
+                for _, field in ipairs(fields) do
+                    local value = lines[i]:match("^%s*" .. field .. ":%s*(.*)$")
+                    if value then
+                        yaml[field] = value:lower()
+                        matched_at = i
+                    end
+                end
+            else
+                -- Stop parsing with decreased indentation
+                break
+            end
+        end
+    end
+    return yaml, matched_at
+end
+
+---Parse YAML specification stored in a table
 ---@param lines table
 ---@return table
 local function parse_yaml_table(lines)
@@ -89,46 +126,11 @@ local function parse_yaml_table(lines)
             yaml["jupyter"] = jupyter
             -- Check for complete kernelspec
             if jupyter == "" then
-                -- Initialise outer indentation counter
-                local indent_outer = 0
-                -- Loop across lines below the `jupyter:` line
-                for j = i + 1, #lines do
-                    -- Skip empty lines
-                    if not lines[j]:match("^$") then
-                        local current_indent_outer = #lines[j]:match("^(%s*)")
-                        if current_indent_outer >= indent_outer then
-                            indent_outer = current_indent_outer
-                            local kernelspec = lines[j]:match("^%s*kernelspec:$")
-                            if kernelspec then
-                                -- Initialise inner indentation counter
-                                local indent_inner = 0
-                                -- Loop across lines below the `kernelspec:` line
-                                for k = j + 1, #lines do
-                                    -- Skip empty lines
-                                    if not lines[k]:match("^$") then
-                                        local current_indent_inner = #lines[k]:match("^(%s*)")
-                                        if current_indent_inner >= indent_inner then
-                                            indent_inner = current_indent_inner
-                                            local language = lines[k]:match("^%s*language:%s*(.*)$")
-                                            local name = lines[k]:match("^%s*name:%s*(.*)$")
-                                            if language then
-                                                yaml["language"] = language:lower()
-                                            end
-                                            if name then
-                                                yaml["name"] = name:lower()
-                                            end
-                                        else
-                                            -- Stop parsing with decreased indentation
-                                            break
-                                        end
-                                    end
-                                end
-                            end
-                        else
-                            -- Stop parsing with decreased indentation
-                            break
-                        end
-                    end
+                -- Find the line where `kernelspec:` is specified, if present
+                local _, kernelspec_at = scan_yaml_block(i + 1, lines, yaml, { "kernelspec" })
+                if kernelspec_at then
+                    -- Find the `language:` and `name:` lines
+                    scan_yaml_block(kernelspec_at + 1, lines, yaml, { "language", "name" })
                 end
             end
         -- Knitr can be both short-form and nested, but makes no difference to
