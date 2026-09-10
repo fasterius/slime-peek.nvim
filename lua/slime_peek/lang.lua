@@ -215,7 +215,7 @@ local function get_yaml_language()
         end
     elseif yaml.engine then
         if yaml.engine == "jupyter" then
-            return util.raise_error("Engine specifies 'jupyter' without a full kernelspec")
+            return util.raise_error("Engine specifies 'jupyter' without a full kernelspec or short-form specification")
         elseif yaml.engine == "knitr" then
             return "r"
         elseif yaml.engine == "" then
