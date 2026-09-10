@@ -39,63 +39,81 @@ local function get_chunk_language()
     end
 end
 
+---Get YAML header lines and store in a table
+---@return table|nil
+local function get_yaml_lines()
+    -- Verify that the first line in the document is `---`
+    local first_line = vim.api.nvim_buf_get_lines(0, 0, 1, false)[1]
+    if first_line ~= "---" then
+        return util.raise_error("YAML header not found; Quarto document is malformed")
+    end
+
+    -- Find the closing `---` of the YAML header (starting from line 2)
+    local yaml_end_line = nil
+    local lines = vim.api.nvim_buf_get_lines(0, 1, -1, false)
+    for i, line in ipairs(lines) do
+        if line == "---" then
+            yaml_end_line = i + 1 -- +1 since `nvim_buf_get_lines` is 0-indexed
+            break
+        end
+    end
+    if not yaml_end_line then
+        return util.raise_error("YAML header not found; Quarto document is malformed")
+    end
+
+    -- Get the YAML content and store in a table
+    return vim.api.nvim_buf_get_lines(0, 1, yaml_end_line - 1, false)
+end
+
 ---Get YAML header language
 ---Check that the YAML header exists, is properly formatted and contains a
 ---language specification; return the language if this is the case.
 ---@return string|nil language
 local function get_yaml_language()
-    -- Store the current cursor position and set the cursor position to the
-    -- beginning of the file, so that we can search for the YAML header
-    local original_cursor_position = vim.api.nvim_win_get_cursor(0)
-    vim.api.nvim_win_set_cursor(0, { 1, 0 })
-
-    -- Get the line number for the end of the YAML header
-    local yaml_end_line = vim.fn.search("^---$", "nW")
-
-    -- Abort if no YAML header found
-    if yaml_end_line == 0 then
-        vim.api.nvim_win_set_cursor(0, original_cursor_position)
-        return util.raise_error("YAML header not found; Quarto document is malformed")
+    -- Read YAML header into table
+    local yaml_lines = get_yaml_lines()
+    if not yaml_lines then
+        return
     end
 
-    -- Search through the YAML header and get the line with language information
-    local pattern = "^knitr:\\|^jupyter:\\|^engine:"
-    local line_number = vim.fn.search(pattern, "nW", yaml_end_line)
-
-    -- Reset cursor position as all searches are now done, but before checking
-    -- if a match is found
-    vim.api.nvim_win_set_cursor(0, original_cursor_position)
+    -- Loop over YAML header table and store relevant information
+    local yaml = {}
+    for _, line in ipairs(yaml_lines) do
+        for _, key in ipairs({ "jupyter", "knitr", "engine" }) do
+            -- Pattern works even for lines like `^knitr:$` with nothing after
+            -- it, as it returns "" (empty string), which is truthy for later
+            -- checks against e.g. `if yaml.knitr then ...`
+            local value = line:match("^" .. key .. ":%s*(.*)$")
+            if value then
+                yaml[key] = value
+            end
+        end
+    end
 
     -- Raise error if no match is found
-    if line_number == 0 then
+    if not (yaml.engine or yaml.jupyter or yaml.knitr) then
         return util.raise_error("Quarto language specification not found in YAML header")
     end
 
-    -- Parse the engine specification line and return the language
-    local line = vim.split(vim.fn.getline(line_number), "%s+")
-    local engine_spec = line[1]
-    if engine_spec == "engine:" then
-        local engine = line[2]
-        if engine == "knitr" then
-            return "r"
-        elseif engine == "jupyter" then
-            return "python"
-        else
-            return util.raise_error("Engine " .. engine .. " is not supported")
-        end
-    elseif engine_spec == "knitr:" then
+    -- Parse the YAML specification line and return the language
+    if yaml.knitr then
         return "r"
-    elseif engine_spec == "jupyter:" then
-        local kernel = line[2]
-        if kernel == "python" or kernel == "python3" then
+    elseif yaml.jupyter then
+        if yaml.jupyter == "python" or yaml.jupyter == "python3" then
             return "python"
-        elseif kernel == "r" then
+        elseif yaml.jupyter == "r" then
             return "r"
-        elseif kernel == "julia" or kernel:match("^julia%-") then
+        elseif yaml.jupyter == "julia" or yaml.jupyter:match("^julia%-") then
             return "julia"
         else
-            return util.raise_error("Kernel '" .. kernel .. "' is not supported")
+            return util.raise_error("Kernel '" .. yaml.jupyter .. "' is not supported")
         end
+    elseif yaml.engine == "jupyter" then
+        return "python"
+    elseif yaml.engine == "knitr" then
+        return "r"
+    else
+        return util.raise_error("Engine '" .. yaml.engine .. "' is not supported")
     end
 end
 
