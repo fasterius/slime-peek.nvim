@@ -193,13 +193,7 @@ local function get_yaml_language()
         return "r"
     elseif yaml.jupyter then
         -- Short-form jupyter
-        if yaml.jupyter == "python" or yaml.jupyter == "python3" then
-            return "python"
-        elseif yaml.jupyter == "r" then
-            return "r"
-        elseif yaml.jupyter == "julia" or yaml.jupyter:match("^julia%-") then
-            return "julia"
-        elseif yaml.jupyter == "" then
+        if yaml.jupyter == "" then
             -- Full kernelspec, prioritising `language` over `name`
             if yaml.language or yaml.name then
                 if yaml.language then
@@ -211,7 +205,8 @@ local function get_yaml_language()
                 return util.raise_error("Kernel field is empty, without a full kernelspec")
             end
         else
-            return util.raise_error("Kernel '" .. yaml.jupyter .. "' is not supported")
+            -- Get language from allowed identifiers
+            return get_language_from_identifier(yaml.jupyter)
         end
     elseif yaml.engine then
         if yaml.engine == "jupyter" then
