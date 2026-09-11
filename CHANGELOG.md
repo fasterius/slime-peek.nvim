@@ -6,6 +6,16 @@
 
 - Julia support for scripts and Quarto documents, including Julia command
   generation and Jupyter kernel detection.
+- Full `kernelspec` parsing for YAML headers.
+- Support for the `ir` Jupyter kernel.
+
+### Fixed
+
+- Using `engine: jupyter` without anything else now correctly returns an error,
+  instead of defaulting to `python` for the language.
+- An empty `jupyter:` or `engine:` YAML field now correctly returns an error.
+- Using `jupyter:` now correctly takes precedence over `engine:` when using YAML
+  language specification.
 
 ## [1.2.1] - 2026-09-01
 

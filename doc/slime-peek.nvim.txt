@@ -27,8 +27,13 @@
 
  For Quarto documents, `slime-peek` will check the current code chunk's
  language by default, with an option to instead use the language specified in
- the YAML header of the document (using either `engine:`, `knitr:` or
- `jupyter:`).
+ the YAML header of the document (using either the short `jupyter: <kernel>`,
+ a fully nested `jupyter:` plus `kernelspec:`, `knitr:` or `engine:`). The
+ following languages and their (case-insensitive) identifiers are supported:
+
+   Python: `python` or `python3`
+   R:      `r` or `ir`
+   Julia:  `julia` or `julia-<version>`
 
 ==============================================================================
 

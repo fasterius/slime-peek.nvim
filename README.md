@@ -147,8 +147,9 @@ Markdown or Quarto documents. For scripts and R Markdown documents, the language
 is inferred by the file type, as those documents are only used with their
 respective programming language. For Quarto documents, `slime-peek` will check
 the current code chunk's language by default, with an option to instead use the
-language specified in the YAML header of the document (using either `engine:`,
-`knitr:` or `jupyter:`).
+language specified in the YAML header of the document (using either the shorter
+`jupyter: <kernel>`, a fully nested `jupyter:` plus `kernelspec:`, `knitr:` or
+`engine:`).
 
 The plugin assumes you have `vim-slime` configured and a running REPL in e.g. a
 Tmux pane or a Neovim terminal; `slime-peek` only constructs and sends commands,
