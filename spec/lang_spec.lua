@@ -103,17 +103,35 @@ describe("get_file_language", function()
     end)
 
     -- Quarto chunk-based language specifications
+    local chunk = {
+        "first line",
+        "```{r}",
+        "chunk 1",
+        "```",
+        "first line between chunks",
+        "```{python}",
+        "chunk 2",
+        "```",
+        "second line between chunks",
+        "```{julia}",
+        "chunk 3",
+        "```",
+        "last line",
+    }
     it("returns `python` when chunk language is Python", function()
-        local chunk = { "```{python}", "chunk content", "```" }
-        assert.equal("python", get_language_for_chunk(chunk, 2))
+        assert.equal("python", get_language_for_chunk(chunk, 7))
     end)
     it("returns `r` when chunk language is R", function()
-        local chunk = { "```{r}", "chunk content", "```" }
-        assert.equal("r", get_language_for_chunk(chunk, 2))
+        assert.equal("r", get_language_for_chunk(chunk, 3))
     end)
     it("returns `julia` when chunk language is Julia", function()
-        local chunk = { "```{julia}", "chunk content", "```" }
-        assert.equal("julia", get_language_for_chunk(chunk, 2))
+        assert.equal("julia", get_language_for_chunk(chunk, 11))
+    end)
+    it("returns `r` when chunk language is R and cursor is on chunk header", function()
+        assert.equal("r", get_language_for_chunk(chunk, 2))
+    end)
+    it("returns `r` when chunk language is R and cursor is on chunk ending", function()
+        assert.equal("r", get_language_for_chunk(chunk, 4))
     end)
 
     -- Quarto YAML header-based language specification malformations

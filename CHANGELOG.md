@@ -8,6 +8,7 @@
   generation and Jupyter kernel detection.
 - Full `kernelspec` parsing for YAML headers.
 - Support for the `ir` Jupyter kernel.
+- Chunk-based language detection now also happens on chunk headers and endings.
 
 ### Fixed
 
