@@ -71,14 +71,34 @@ end
 ---level, but ignore blank lines.
 ---@param start integer
 ---@param lines table
+---@param indent_anchor integer
 ---@param yaml table
 ---@param fields table
 ---@return table, integer|nil
-local function scan_yaml_block(start, lines, yaml, fields)
-    -- Initialise indentation counter
-    local indent_level = 0
+local function scan_yaml_block(start, lines, indent_anchor, yaml, fields)
+    -- Check that the starting line exists
+    if start > #lines then
+        return yaml, nil
+    end
+
+    -- Check that the starting line (or lines) is not empty or whitespace only
+    while lines[start]:match("^%s*$") do
+        start = start + 1
+        if start > #lines then
+            return yaml, nil
+        end
+    end
+
+    -- Check that the indentation level of the starting line is larger than the
+    -- anchor indentation level
+    local indent_level = #lines[start]:match("^(%s*)")
+    if indent_level <= indent_anchor then
+        return yaml, nil
+    end
+
     -- Initialise index of matched pattern
     local matched_at = nil
+
     -- Loop across lines
     for i = start, #lines do
         -- Skip empty lines
@@ -127,10 +147,12 @@ local function parse_yaml_table(lines)
             -- Check for complete kernelspec
             if jupyter == "" then
                 -- Find the line where `kernelspec:` is specified, if present
-                local _, kernelspec_at = scan_yaml_block(i + 1, lines, yaml, { "kernelspec" })
+                local current_indent = #lines[i]:match("^(%s*)")
+                local _, kernelspec_at = scan_yaml_block(i + 1, lines, current_indent, yaml, { "kernelspec" })
                 if kernelspec_at then
+                    local kernelspec_indent = #lines[kernelspec_at]:match("^(%s*)")
                     -- Find the `language:` and `name:` lines
-                    scan_yaml_block(kernelspec_at + 1, lines, yaml, { "language", "name" })
+                    scan_yaml_block(kernelspec_at + 1, lines, kernelspec_indent, yaml, { "language", "name" })
                 end
             end
         -- Knitr can be both short-form and nested, but makes no difference to

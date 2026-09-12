@@ -129,16 +129,6 @@ describe("get_file_language", function()
         assert.is_nil(get_language_for_yaml({ "---", "---" }))
         assert_notified("Quarto language specification not found in YAML header")
     end)
-    -- it("returns nil with `jupyter:` with wrong indentation", function()
-    --     assert.is_nil(get_language_for_yaml({
-    --         "---",
-    --         "jupyter:",
-    --         "  kernelspec:",
-    --         "  language: r",
-    --         "---",
-    --     }))
-    --     -- assert_notified("Quarto language specification not found in YAML header")
-    -- end)
 
     -- Quarto YAML header-based with `knitr:`
     it("returns `r` for `knitr:` using YAML", function()
@@ -236,32 +226,31 @@ describe("get_file_language", function()
     end)
 
     -- Quarto YAML header-based kernelspec parsing edge cases
-    it("does not pick up unrelated `language:`/`name:` content after the kernelspec block has ended", function()
+    it("returns `r` even with unrelated `language:`/`name:` content after the kernelspec block has ended", function()
         local yaml_header = {
             "---",
             "jupyter:",
             "  kernelspec:",
             "    name: ir",
-            "editor_options:",
-            "  chunk_output_type: console",
             "some_other_block:",
             "  language: cobol",
             "---",
         }
         assert.equal("r", get_language_for_yaml(yaml_header))
     end)
-    it("finds `kernelspec:` even with a blank line between it and `jupyter:`", function()
+    it("returns `r` for `kernelspec:` with blank/whitespace lines between it and `jupyter:`", function()
         local yaml_header = {
             "---",
             "jupyter:",
             "",
+            "  ",
             "  kernelspec:",
             "    name: ir",
             "---",
         }
         assert.equal("r", get_language_for_yaml(yaml_header))
     end)
-    it("finds `language:` past a blank line inside the kernelspec block, still prioritised over an earlier `name:`", function()
+    it("returns `r` with `language:` is past a blank line inside the kernelspec block", function()
         local yaml_header = {
             "---",
             "jupyter:",
@@ -272,6 +261,28 @@ describe("get_file_language", function()
             "---",
         }
         assert.equal("r", get_language_for_yaml(yaml_header))
+    end)
+    it("returns nil when `kernelspec:` has same indentation as `jupyter:`", function()
+        local yaml_header = {
+            "---",
+            "jupyter:",
+            "kernelspec:",
+            "  language: r",
+            "---",
+        }
+        assert.is_nil(get_language_for_yaml(yaml_header))
+        assert_notified("Kernel field is empty, without a full kernelspec")
+    end)
+    it("returns nil when `language:`/`name:` has same indentation as `kernelspec:`", function()
+        local yaml_header = {
+            "---",
+            "jupyter:",
+            "  kernelspec:",
+            "  language: r",
+            "---",
+        }
+        assert.is_nil(get_language_for_yaml(yaml_header))
+        assert_notified("Kernel field is empty, without a full kernelspec")
     end)
 
     -- Quarto YAML header-based with `jupyter:` and `kernelspec:` but without
