@@ -1,9 +1,6 @@
 local M = {}
 
--- The complete list of known configuration keys
-local known_opts = {
-    use_yaml_language = true,
-}
+local config = require("slime_peek.config")
 
 ---Run slime-peek's healthcheck
 ---Report on the presence of the plugin's requirements: a recent enough
@@ -27,10 +24,9 @@ function M.check()
         )
     end
 
-    local opts = require("slime_peek").opts
     local unknown = {}
-    for key in pairs(opts) do
-        if not known_opts[key] then
+    for key in pairs(config.opts) do
+        if config.defaults[key] == nil then
             table.insert(unknown, key)
         end
     end

@@ -1,27 +1,14 @@
 local M = {}
 
 local commands = require("slime_peek.commands")
+local config = require("slime_peek.config")
 local lang = require("slime_peek.lang")
 local util = require("slime_peek.util")
 
----@class slime_peek.Opts
----@field use_yaml_language? boolean
-
----Default configuration
----@type slime_peek.Opts
-M.opts = {
-    use_yaml_language = false,
-}
-
----Setup with options and validation
----@param opts slime_peek.Opts|nil
+---Setup with user options
+---@param opts slime_peek.Opts | nil
 function M.setup(opts)
-    opts = opts or {}
-    vim.validate({
-        opts = { opts, "table" },
-        ["opts.use_yaml_language"] = { opts.use_yaml_language, "boolean", true },
-    })
-    M.opts = vim.tbl_extend("force", M.opts, opts)
+    config.setup(opts)
 end
 
 ---Extract text from the last operator/motion range
@@ -71,7 +58,7 @@ M._command = nil
 ---specified by the last operator/motion), the file language and the command and
 ---send it to the REPL. Uses states specified in `_use_operator` and `_command`.
 function M._send_command_to_repl()
-    local language = lang.get_file_language(M.opts.use_yaml_language)
+    local language = lang.get_file_language(config.opts.use_yaml_language)
     local ok, err = pcall(function()
         -- Get the text to send either from the word under the cursor or a
         -- user-specified operator/motion
