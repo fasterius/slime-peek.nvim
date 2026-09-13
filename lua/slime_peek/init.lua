@@ -27,7 +27,7 @@ end
 ---Extract text from the last operator/motion range
 ---Extract the text given by the last user-specified operation/motion that is
 ---meant to be sent to the REPL.
----@return string text the selected text
+---@return string text
 local function get_text_from_operator_range()
     -- Get the positions of the start and end of the last operator/motion
     -- The `getpos()` function returns {bufnum, lnum, col, off}
@@ -42,7 +42,7 @@ local function get_text_from_operator_range()
 
     -- Enforce single-line selection
     if start_line ~= end_line then
-        util.raise_error("Multi-line selections are not supported")
+        error("Multi-line selections are not supported", 0)
     end
 
     -- The function is always called from the current buffer
@@ -52,7 +52,7 @@ local function get_text_from_operator_range()
     -- positions. The `nvim_buf_get_lines()` function is 0-based for the start
     local line = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)[1]
     if not line then
-        return util.raise_error("Could not get line for operator range")
+        error("Could not get line for operator range", 0)
     end
     return string.sub(line, start_col, end_col)
 end
@@ -69,30 +69,34 @@ M._command = nil
 ---Send commands to the REPL
 ---Get the text to be sent (either the word under the cursor or the text
 ---specified by the last operator/motion), the file language and the command and
----send it to the REPL. Does not return anything; errors are handled upstream.
----Uses states specified in `_use_operator` and `_command`.
+---send it to the REPL. Uses states specified in `_use_operator` and `_command`.
 function M._send_command_to_repl()
     local language = lang.get_file_language(M.opts.use_yaml_language)
-    -- Get the text to send either from the word under the cursor or a
-    -- user-specified operator/motion
-    local text
-    if M._use_operator then
-        text = get_text_from_operator_range()
-    else
-        text = vim.fn.expand("<cword>")
-    end
-    -- Build the per-language command
-    local command
-    if language == "r" then
-        command = commands.get_r_command(M._command, text)
-    elseif language == "python" then
-        command = commands.get_python_command(M._command, text)
-    elseif language == "julia" then
-        command = commands.get_julia_command(M._command, text)
-    end
-    -- Send to the REPL
-    if command then
-        vim.cmd('SlimeSend0 "' .. command .. '"')
+    local ok, err = pcall(function()
+        -- Get the text to send either from the word under the cursor or a
+        -- user-specified operator/motion
+        local text
+        if M._use_operator then
+            text = get_text_from_operator_range()
+        else
+            text = vim.fn.expand("<cword>")
+        end
+        -- Build the per-language command
+        local command
+        if language == "r" then
+            command = commands.get_r_command(M._command, text)
+        elseif language == "python" then
+            command = commands.get_python_command(M._command, text)
+        elseif language == "julia" then
+            command = commands.get_julia_command(M._command, text)
+        end
+        -- Send to the REPL
+        if command then
+            vim.cmd('SlimeSend0 "' .. command .. '"')
+        end
+    end)
+    if not ok then
+        util.raise_error(tostring(err))
     end
 end
 
@@ -108,8 +112,8 @@ end
 ---Reduce code duplication by having all individual per-command user-facing
 ---functions call this function with the correct command and whether to use
 ---operator mode.
----@param command string the operation to send to the REPL
----@param use_operator boolean whether to use operator/motion mode
+---@param command string
+---@param use_operator boolean
 local function peek_command(command, use_operator)
     M._use_operator = use_operator
     M._command = command

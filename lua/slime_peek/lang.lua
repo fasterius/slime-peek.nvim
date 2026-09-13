@@ -5,20 +5,20 @@ local util = require("slime_peek.util")
 ---Get chunk language
 ---Check if cursor is inside a code chunk as well as parses and returns the
 ---language when this is the case.
----@return string|nil language
+---@return string language
 local function get_chunk_language()
     -- Find a chunk start (header) backwards from the cursor position; if it
     -- can't be found the cursor is outside a chunk at the beginning of the file
     local start_backward = vim.fn.search("^```{", "nbcW")
     if start_backward == 0 then
-        return util.raise_error("Cannot find chunk header")
+        error("Cannot find chunk header", 0)
     end
 
     -- Find a chunk end forwards from the cursor position; if it can't be found
     -- the cursor is outside a chunk at the end of the file
     local end_forward = vim.fn.search("^```$", "ncW")
     if end_forward == 0 then
-        return util.raise_error("Cannot find chunk ending")
+        error("Cannot find chunk ending", 0)
     end
 
     -- Find a chunk start forwards from the cursor position; if it's found and
@@ -26,7 +26,7 @@ local function get_chunk_language()
     -- the cursor is outside of a chunk
     local start_forward = vim.fn.search("^```{", "nW")
     if start_forward > 0 and start_forward < end_forward then
-        return util.raise_error("Cursor is not inside a valid code chunk")
+        error("Cursor is not inside a valid code chunk", 0)
     end
 
     -- Parse the chunk header and find the specified language
@@ -35,17 +35,17 @@ local function get_chunk_language()
     if language == "python" or language == "r" or language == "julia" then
         return language
     else
-        return util.raise_error("Quarto language '" .. language .. "' is not supported")
+        error("Quarto language '" .. language .. "' is not supported", 0)
     end
 end
 
 ---Get YAML header lines and store in a table
----@return table|nil
+---@return table lines
 local function get_yaml_lines()
     -- Verify that the first line in the document is `---`
     local first_line = vim.api.nvim_buf_get_lines(0, 0, 1, false)[1]
     if first_line ~= "---" then
-        return util.raise_error("YAML header not found; Quarto document is malformed")
+        error("YAML header not found; Quarto document is malformed", 0)
     end
 
     -- Find the closing `---` of the YAML header (starting from line 2)
@@ -58,7 +58,7 @@ local function get_yaml_lines()
         end
     end
     if not yaml_end_line then
-        return util.raise_error("YAML header not found; Quarto document is malformed")
+        error("YAML header not found; Quarto document is malformed", 0)
     end
 
     -- Get the YAML content and store in a table
@@ -67,8 +67,9 @@ end
 
 ---Scan an indented block for presence of fields and their values, returning
 ---both the YAML table with the fields/values added, as well as the index at
----which the field matched. Stop scanning when reaching a lower indentation
----level, but ignore blank lines.
+---which the field matched. The first non-blank line must be more indented
+---than `indent_anchor`, or scanning stops immediately with no match. Stop
+---scanning when reaching a lower indentation level, but ignore blank lines.
 ---@param start integer
 ---@param lines table
 ---@param indent_anchor integer
@@ -177,7 +178,7 @@ local LANGUAGE_IDENTIFIERS = {
 
 ---Resolve an identifier name to a Jupyter language
 ---@param identifier string
----@return string|nil language
+---@return string language
 local function get_language_from_identifier(identifier)
     local language = LANGUAGE_IDENTIFIERS[identifier]
     -- Direct match
@@ -188,26 +189,23 @@ local function get_language_from_identifier(identifier)
     if identifier:match("^julia%-") then
         return "julia"
     end
-    return util.raise_error("'" .. identifier .. "' is not supported")
+    error("'" .. identifier .. "' is not supported", 0)
 end
 
 ---Get YAML header language
 ---Check that the YAML header exists, is properly formatted and contains a
 ---language specification; return the language if this is the case.
----@return string|nil language
+---@return string language
 local function get_yaml_language()
     -- Read YAML header into table
     local yaml_lines = get_yaml_lines()
-    if not yaml_lines then
-        return
-    end
 
     -- Parse YAML table
     local yaml = parse_yaml_table(yaml_lines)
 
     -- Raise error if no match is found
     if not (yaml.engine or yaml.jupyter or yaml.knitr) then
-        return util.raise_error("Quarto language specification not found in YAML header")
+        error("Quarto language specification not found in YAML header", 0)
     end
 
     -- Parse the YAML specification line and return the language
@@ -224,7 +222,7 @@ local function get_yaml_language()
                     return get_language_from_identifier(yaml.name)
                 end
             else
-                return util.raise_error("Kernel field is empty, without a full kernelspec")
+                error("Kernel field is empty, without a full kernelspec", 0)
             end
         else
             -- Get language from allowed identifiers
@@ -232,41 +230,49 @@ local function get_yaml_language()
         end
     elseif yaml.engine then
         if yaml.engine == "jupyter" then
-            return util.raise_error("Engine specifies 'jupyter' without a full kernelspec or short-form specification")
+            error("Engine specifies 'jupyter' without a full kernelspec or short-form specification", 0)
         elseif yaml.engine == "knitr" then
             return "r"
         elseif yaml.engine == "" then
-            return util.raise_error("Engine specification is empty")
+            error("Engine specification is empty", 0)
         else
-            return util.raise_error("Engine '" .. yaml.engine .. "' is not supported")
+            error("Engine '" .. yaml.engine .. "' is not supported", 0)
         end
     end
 end
 
 ---Get language for current file
----Check the current filetype and gets the corresponding language as appropriate
+---Check the current filetype and gets the corresponding language as
+---appropriate.
 ---@param use_yaml_language boolean|nil
 ---@return string|nil language
 function M.get_file_language(use_yaml_language)
-    -- Access the filetype of the current buffer
-    local filetype = vim.bo.filetype
+    -- Catch errors in language specifications
+    local ok, results = pcall(function()
+        -- Access the filetype of the current buffer
+        local filetype = vim.bo.filetype
 
-    -- Check the filetype and return corresponding language
-    if filetype == "r" or filetype == "rmd" then
-        return "r"
-    elseif filetype == "python" then
-        return "python"
-    elseif filetype == "julia" then
-        return "julia"
-    elseif filetype == "quarto" then
-        if use_yaml_language then
-            return get_yaml_language()
+        -- Check the filetype and return corresponding language
+        if filetype == "r" or filetype == "rmd" then
+            return "r"
+        elseif filetype == "python" then
+            return "python"
+        elseif filetype == "julia" then
+            return "julia"
+        elseif filetype == "quarto" then
+            if use_yaml_language then
+                return get_yaml_language()
+            else
+                return get_chunk_language()
+            end
         else
-            return get_chunk_language()
+            error("Filetype '" .. filetype .. "' is not supported", 0)
         end
-    else
-        return util.raise_error("Filetype '" .. filetype .. "' is not supported")
+    end)
+    if not ok then
+        return util.raise_error(results)
     end
+    return results
 end
 
 return M
