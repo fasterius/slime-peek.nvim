@@ -51,8 +51,10 @@ describe("get_file_language", function()
     ---the same way `util.raise_error` prefixes every error it reports
     ---@param message string
     local function assert_notified(message)
-        ---@diagnostic disable-next-line: undefined-field
-        assert.stub(notify_stub).was_called_with("Error: " .. message, vim.log.levels.ERROR)
+        assert
+            .stub(notify_stub)
+            ---@diagnostic disable-next-line: undefined-field
+            .was_called_with("Error: " .. message, vim.log.levels.ERROR)
     end
 
     -- Filetype language specifications
@@ -127,16 +129,24 @@ describe("get_file_language", function()
     it("returns `julia` when chunk language is Julia", function()
         assert.equal("julia", get_language_for_chunk(chunk, 11))
     end)
-    it("returns `r` when chunk language is R and cursor is on chunk header", function()
-        assert.equal("r", get_language_for_chunk(chunk, 2))
-    end)
-    it("returns `r` when chunk language is R and cursor is on chunk ending", function()
-        assert.equal("r", get_language_for_chunk(chunk, 4))
-    end)
+    it(
+        "returns `r` when chunk language is R and cursor is on chunk header",
+        function()
+            assert.equal("r", get_language_for_chunk(chunk, 2))
+        end
+    )
+    it(
+        "returns `r` when chunk language is R and cursor is on chunk ending",
+        function()
+            assert.equal("r", get_language_for_chunk(chunk, 4))
+        end
+    )
 
     -- Quarto YAML header-based language specification malformations
     it("returns nil when YAML header is not at file beginning", function()
-        assert.is_nil(get_language_for_yaml({ "malformed first line", "---", "---" }))
+        assert.is_nil(
+            get_language_for_yaml({ "malformed first line", "---", "---" })
+        )
         assert_notified("YAML header not found; Quarto document is malformed")
     end)
     it("returns nil when YAML header ending is not found", function()
@@ -145,7 +155,9 @@ describe("get_file_language", function()
     end)
     it("returns nil when jupyter, knitr and engine are all missing", function()
         assert.is_nil(get_language_for_yaml({ "---", "---" }))
-        assert_notified("Quarto language specification not found in YAML header")
+        assert_notified(
+            "Quarto language specification not found in YAML header"
+        )
     end)
 
     -- Quarto YAML header-based with `knitr:`
@@ -155,22 +167,37 @@ describe("get_file_language", function()
 
     -- Quarto YAML header-based with short-form `jupyter:`
     it("returns `r` for `jupyter: ir` using YAML", function()
-        assert.equal("r", get_language_for_yaml({ "---", "jupyter: ir", "---" }))
+        assert.equal(
+            "r",
+            get_language_for_yaml({ "---", "jupyter: ir", "---" })
+        )
     end)
     it("returns `r` for `jupyter: r` using YAML", function()
         assert.equal("r", get_language_for_yaml({ "---", "jupyter: r", "---" }))
     end)
     it("returns `python` for `jupyter: python` using YAML", function()
-        assert.equal("python", get_language_for_yaml({ "---", "jupyter: python", "---" }))
+        assert.equal(
+            "python",
+            get_language_for_yaml({ "---", "jupyter: python", "---" })
+        )
     end)
     it("returns `python` for `jupyter: python3` using YAML", function()
-        assert.equal("python", get_language_for_yaml({ "---", "jupyter: python3", "---" }))
+        assert.equal(
+            "python",
+            get_language_for_yaml({ "---", "jupyter: python3", "---" })
+        )
     end)
     it("returns `julia` for `jupyter: julia` using YAML", function()
-        assert.equal("julia", get_language_for_yaml({ "---", "jupyter: julia", "---" }))
+        assert.equal(
+            "julia",
+            get_language_for_yaml({ "---", "jupyter: julia", "---" })
+        )
     end)
     it("returns `julia` for `jupyter: julia-<version>` using YAML", function()
-        assert.equal("julia", get_language_for_yaml({ "---", "jupyter: julia-1.0", "---" }))
+        assert.equal(
+            "julia",
+            get_language_for_yaml({ "---", "jupyter: julia-1.0", "---" })
+        )
     end)
     it("returns nil for `jupyter: cobol` using YAML", function()
         assert.is_nil(get_language_for_yaml({ "---", "jupyter: cobol", "---" }))
@@ -179,129 +206,178 @@ describe("get_file_language", function()
 
     -- Quarto YAML header-based with `jupyter:`, `kernelspec:` and `language:`
     it("returns `r` for `language: r` using YAML", function()
-        local yaml_header = { "---", "jupyter:", "  kernelspec:", "    language: r", "---" }
+        local yaml_header =
+            { "---", "jupyter:", "  kernelspec:", "    language: r", "---" }
         assert.equal("r", get_language_for_yaml(yaml_header))
     end)
     it("returns `r` for `language: ir` using YAML", function()
-        local yaml_header = { "---", "jupyter:", "  kernelspec:", "    language: ir", "---" }
+        local yaml_header =
+            { "---", "jupyter:", "  kernelspec:", "    language: ir", "---" }
         assert.equal("r", get_language_for_yaml(yaml_header))
     end)
     it("returns `python` for `language: python` using YAML", function()
-        local yaml_header = { "---", "jupyter:", "  kernelspec:", "    language: python", "---" }
-        assert.equal("python", get_language_for_yaml(yaml_header))
-    end)
-    it("returns `python` for `language: python3` using YAML", function()
-        local yaml_header = { "---", "jupyter:", "  kernelspec:", "    language: python3", "---" }
-        assert.equal("python", get_language_for_yaml(yaml_header))
-    end)
-    it("returns `julia` for `language: julia` using YAML", function()
-        local yaml_header = { "---", "jupyter:", "  kernelspec:", "    language: julia", "---" }
-        assert.equal("julia", get_language_for_yaml(yaml_header))
-    end)
-    it("returns `julia` for `language: julia-<ver>` using YAML", function()
-        local yaml_header = { "---", "jupyter:", "  kernelspec:", "    language: julia-1.0", "---" }
-        assert.equal("julia", get_language_for_yaml(yaml_header))
-    end)
-
-    -- Quarto YAML header-based with `jupyter:`, `kernelspec:` and `name:`
-    it("returns `r` for `name: r` using YAML", function()
-        local yaml_header = { "---", "jupyter:", "  kernelspec:", "    name: r", "---" }
-        assert.equal("r", get_language_for_yaml(yaml_header))
-    end)
-    it("returns `r` for `name: ir` using YAML", function()
-        local yaml_header = { "---", "jupyter:", "  kernelspec:", "    name: ir", "---" }
-        assert.equal("r", get_language_for_yaml(yaml_header))
-    end)
-    it("returns `python` for `name: python` using YAML", function()
-        local yaml_header = { "---", "jupyter:", "  kernelspec:", "    name: python", "---" }
-        assert.equal("python", get_language_for_yaml(yaml_header))
-    end)
-    it("returns `python` for `name: python3` using YAML", function()
-        local yaml_header = { "---", "jupyter:", "  kernelspec:", "    name: python3", "---" }
-        assert.equal("python", get_language_for_yaml(yaml_header))
-    end)
-    it("returns `julia` for `name: julia` using YAML", function()
-        local yaml_header = { "---", "jupyter:", "  kernelspec:", "    name: julia", "---" }
-        assert.equal("julia", get_language_for_yaml(yaml_header))
-    end)
-    it("returns `julia` for `name: julia-<ver>` using YAML", function()
-        local yaml_header = { "---", "jupyter:", "  kernelspec:", "    name: julia-1.0", "---" }
-        assert.equal("julia", get_language_for_yaml(yaml_header))
-    end)
-
-    -- Quarto YAML header-based with `jupyter:`, `kernelspec:`, `name:` and
-    -- `language:`, where the `language:` is prioritised over `name:`
-    it("returns `python` for `name: r` and `language: python` using YAML", function()
         local yaml_header = {
             "---",
             "jupyter:",
             "  kernelspec:",
-            "    name: r",
             "    language: python",
             "---",
         }
         assert.equal("python", get_language_for_yaml(yaml_header))
     end)
+    it("returns `python` for `language: python3` using YAML", function()
+        local yaml_header = {
+            "---",
+            "jupyter:",
+            "  kernelspec:",
+            "    language: python3",
+            "---",
+        }
+        assert.equal("python", get_language_for_yaml(yaml_header))
+    end)
+    it("returns `julia` for `language: julia` using YAML", function()
+        local yaml_header =
+            { "---", "jupyter:", "  kernelspec:", "    language: julia", "---" }
+        assert.equal("julia", get_language_for_yaml(yaml_header))
+    end)
+    it("returns `julia` for `language: julia-<ver>` using YAML", function()
+        local yaml_header = {
+            "---",
+            "jupyter:",
+            "  kernelspec:",
+            "    language: julia-1.0",
+            "---",
+        }
+        assert.equal("julia", get_language_for_yaml(yaml_header))
+    end)
+
+    -- Quarto YAML header-based with `jupyter:`, `kernelspec:` and `name:`
+    it("returns `r` for `name: r` using YAML", function()
+        local yaml_header =
+            { "---", "jupyter:", "  kernelspec:", "    name: r", "---" }
+        assert.equal("r", get_language_for_yaml(yaml_header))
+    end)
+    it("returns `r` for `name: ir` using YAML", function()
+        local yaml_header =
+            { "---", "jupyter:", "  kernelspec:", "    name: ir", "---" }
+        assert.equal("r", get_language_for_yaml(yaml_header))
+    end)
+    it("returns `python` for `name: python` using YAML", function()
+        local yaml_header =
+            { "---", "jupyter:", "  kernelspec:", "    name: python", "---" }
+        assert.equal("python", get_language_for_yaml(yaml_header))
+    end)
+    it("returns `python` for `name: python3` using YAML", function()
+        local yaml_header =
+            { "---", "jupyter:", "  kernelspec:", "    name: python3", "---" }
+        assert.equal("python", get_language_for_yaml(yaml_header))
+    end)
+    it("returns `julia` for `name: julia` using YAML", function()
+        local yaml_header =
+            { "---", "jupyter:", "  kernelspec:", "    name: julia", "---" }
+        assert.equal("julia", get_language_for_yaml(yaml_header))
+    end)
+    it("returns `julia` for `name: julia-<ver>` using YAML", function()
+        local yaml_header =
+            { "---", "jupyter:", "  kernelspec:", "    name: julia-1.0", "---" }
+        assert.equal("julia", get_language_for_yaml(yaml_header))
+    end)
+
+    -- Quarto YAML header-based with `jupyter:`, `kernelspec:`, `name:` and
+    -- `language:`, where the `language:` is prioritised over `name:`
+    it(
+        "returns `python` for `name: r` and `language: python` using YAML",
+        function()
+            local yaml_header = {
+                "---",
+                "jupyter:",
+                "  kernelspec:",
+                "    name: r",
+                "    language: python",
+                "---",
+            }
+            assert.equal("python", get_language_for_yaml(yaml_header))
+        end
+    )
 
     -- Quarto YAML header-based kernelspec parsing edge cases
-    it("returns `r` even with unrelated `language:`/`name:` content after the kernelspec block has ended", function()
-        local yaml_header = {
-            "---",
-            "jupyter:",
-            "  kernelspec:",
-            "    name: ir",
-            "some_other_block:",
-            "  language: cobol",
-            "---",
-        }
-        assert.equal("r", get_language_for_yaml(yaml_header))
-    end)
-    it("returns `r` for `kernelspec:` with blank/whitespace lines between it and `jupyter:`", function()
-        local yaml_header = {
-            "---",
-            "jupyter:",
-            "",
-            "  ",
-            "  kernelspec:",
-            "    name: ir",
-            "---",
-        }
-        assert.equal("r", get_language_for_yaml(yaml_header))
-    end)
-    it("returns `r` with `language:` is past a blank line inside the kernelspec block", function()
-        local yaml_header = {
-            "---",
-            "jupyter:",
-            "  kernelspec:",
-            "    name: python3",
-            "",
-            "    language: r",
-            "---",
-        }
-        assert.equal("r", get_language_for_yaml(yaml_header))
-    end)
-    it("returns nil when `kernelspec:` has same indentation as `jupyter:`", function()
-        local yaml_header = {
-            "---",
-            "jupyter:",
-            "kernelspec:",
-            "  language: r",
-            "---",
-        }
-        assert.is_nil(get_language_for_yaml(yaml_header))
-        assert_notified("Kernel field is empty, without a full kernelspec")
-    end)
-    it("returns nil when `language:`/`name:` has same indentation as `kernelspec:`", function()
-        local yaml_header = {
-            "---",
-            "jupyter:",
-            "  kernelspec:",
-            "  language: r",
-            "---",
-        }
-        assert.is_nil(get_language_for_yaml(yaml_header))
-        assert_notified("Kernel field is empty, without a full kernelspec")
-    end)
+    it(
+        "returns `r` even with unrelated `language:`/`name:` content after "
+            .. "the kernelspec block has ended",
+        function()
+            local yaml_header = {
+                "---",
+                "jupyter:",
+                "  kernelspec:",
+                "    name: ir",
+                "some_other_block:",
+                "  language: cobol",
+                "---",
+            }
+            assert.equal("r", get_language_for_yaml(yaml_header))
+        end
+    )
+    it(
+        "returns `r` for `kernelspec:` with blank/whitespace lines between "
+            .. "it and `jupyter:`",
+        function()
+            local yaml_header = {
+                "---",
+                "jupyter:",
+                "",
+                "  ",
+                "  kernelspec:",
+                "    name: ir",
+                "---",
+            }
+            assert.equal("r", get_language_for_yaml(yaml_header))
+        end
+    )
+    it(
+        "returns `r` with `language:` is past a blank line inside the "
+            .. "kernelspec block",
+        function()
+            local yaml_header = {
+                "---",
+                "jupyter:",
+                "  kernelspec:",
+                "    name: python3",
+                "",
+                "    language: r",
+                "---",
+            }
+            assert.equal("r", get_language_for_yaml(yaml_header))
+        end
+    )
+    it(
+        "returns nil when `kernelspec:` has same indentation as `jupyter:`",
+        function()
+            local yaml_header = {
+                "---",
+                "jupyter:",
+                "kernelspec:",
+                "  language: r",
+                "---",
+            }
+            assert.is_nil(get_language_for_yaml(yaml_header))
+            assert_notified("Kernel field is empty, without a full kernelspec")
+        end
+    )
+    it(
+        "returns nil when `language:`/`name:` has same indentation as "
+            .. "`kernelspec:`",
+        function()
+            local yaml_header = {
+                "---",
+                "jupyter:",
+                "  kernelspec:",
+                "  language: r",
+                "---",
+            }
+            assert.is_nil(get_language_for_yaml(yaml_header))
+            assert_notified("Kernel field is empty, without a full kernelspec")
+        end
+    )
 
     -- Quarto YAML header-based with `jupyter:` and `kernelspec:` but without
     -- either `language:` or `name:`
@@ -313,11 +389,19 @@ describe("get_file_language", function()
 
     -- Quarto YAML header-based with `engine:`
     it("returns `r` for `engine: knitr`", function()
-        assert.equal("r", get_language_for_yaml({ "---", "engine: knitr", "---" }))
+        assert.equal(
+            "r",
+            get_language_for_yaml({ "---", "engine: knitr", "---" })
+        )
     end)
     it("returns nil for `engine: jupyter` (no kernelspec)", function()
-        assert.is_nil(get_language_for_yaml({ "---", "engine: jupyter", "---" }))
-        assert_notified("Engine specifies 'jupyter' without a full kernelspec or short-form specification")
+        assert.is_nil(
+            get_language_for_yaml({ "---", "engine: jupyter", "---" })
+        )
+        assert_notified(
+            "Engine specifies 'jupyter' without a full kernelspec or "
+                .. "short-form specification"
+        )
     end)
     it("returns nil for `engine:` (no kernelspec)", function()
         assert.is_nil(get_language_for_yaml({ "---", "engine:", "---" }))

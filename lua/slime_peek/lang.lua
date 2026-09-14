@@ -149,11 +149,24 @@ local function parse_yaml_table(lines)
             if jupyter == "" then
                 -- Find the line where `kernelspec:` is specified, if present
                 local current_indent = #lines[i]:match("^(%s*)")
-                local _, kernelspec_at = scan_yaml_block(i + 1, lines, current_indent, yaml, { "kernelspec" })
+                local _, kernelspec_at = scan_yaml_block(
+                    i + 1,
+                    lines,
+                    current_indent,
+                    yaml,
+                    { "kernelspec" }
+                )
                 if kernelspec_at then
-                    local kernelspec_indent = #lines[kernelspec_at]:match("^(%s*)")
+                    local kernelspec_indent =
+                        #lines[kernelspec_at]:match("^(%s*)")
                     -- Find the `language:` and `name:` lines
-                    scan_yaml_block(kernelspec_at + 1, lines, kernelspec_indent, yaml, { "language", "name" })
+                    scan_yaml_block(
+                        kernelspec_at + 1,
+                        lines,
+                        kernelspec_indent,
+                        yaml,
+                        { "language", "name" }
+                    )
                 end
             end
         -- Knitr can be both short-form and nested, but makes no difference to
@@ -230,7 +243,11 @@ local function get_yaml_language()
         end
     elseif yaml.engine then
         if yaml.engine == "jupyter" then
-            error("Engine specifies 'jupyter' without a full kernelspec or short-form specification", 0)
+            error(
+                "Engine specifies 'jupyter' without a full kernelspec or "
+                    .. "short-form specification",
+                0
+            )
         elseif yaml.engine == "knitr" then
             return "r"
         elseif yaml.engine == "" then

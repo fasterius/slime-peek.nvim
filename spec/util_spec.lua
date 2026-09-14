@@ -12,8 +12,9 @@ describe("raise_error", function()
 
     it("notifies with the given message, prefixed with 'Error: '", function()
         util.raise_error("something went wrong")
+        local message = "Error: something went wrong"
         ---@diagnostic disable-next-line: undefined-field
-        assert.stub(notify_stub).was_called_with("Error: something went wrong", vim.log.levels.ERROR)
+        assert.stub(notify_stub).was_called_with(message, vim.log.levels.ERROR)
     end)
 
     it("returns nil", function()
