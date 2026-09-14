@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [1.3.0]
 
 ### Added
 
@@ -19,7 +19,7 @@
   language specification.
 - Correctly use case insensitive short-form YAML-based language specification
 
-## [1.2.1] - 2026-09-01
+## [1.2.1]
 
 ### Fixed
 
@@ -27,7 +27,7 @@
   0.11.0, to match what `health.lua` (added in 1.2.0) actually requires:
   `vim.health.start/ok/warn/error` aren't available on older versions.
 
-## [1.2.0] - 2026-09-01
+## [1.2.0]
 
 ### Added
 
@@ -54,7 +54,7 @@
   annotations (`---@param`, `---@return`, `---@class`), enabling
   type-checking and completion via `lua-language-server`.
 
-## [1.1.0] - 2025-11-28
+## [1.1.0]
 
 ### Added
 
@@ -67,7 +67,7 @@
 - Plugin internals refactored from a single file into separate Lua submodules
   (`commands.lua`, `lang.lua`, `util.lua`) for maintainability.
 
-## [1.0.0] - 2025-06-27
+## [1.0.0]
 
 Initial stable release.
 
