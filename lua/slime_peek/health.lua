@@ -23,7 +23,8 @@ function M.check()
     else
         vim.health.error(
             "vim-slime does not appear to be installed",
-            "Install https://github.com/jpalardy/vim-slime; slime-peek requires it to send text to a REPL"
+            "Install https://github.com/jpalardy/vim-slime; slime-peek "
+                .. "requires it to send text to a REPL"
         )
     end
 
@@ -39,7 +40,8 @@ function M.check()
         vim.health.warn(
             "Unrecognised configuration option(s): "
                 .. table.concat(unknown, ", "),
-            "Check for typos; see |slime-peek.configuration| for the supported options"
+            "Check for typos; see |slime-peek.configuration| for the "
+                .. "supported options"
         )
     end
 end

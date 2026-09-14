@@ -51,9 +51,9 @@ describe("get_file_language", function()
     ---the same way `util.raise_error` prefixes every error it reports
     ---@param message string
     local function assert_notified(message)
-        ---@diagnostic disable-next-line: undefined-field
         assert
             .stub(notify_stub)
+            ---@diagnostic disable-next-line: undefined-field
             .was_called_with("Error: " .. message, vim.log.levels.ERROR)
     end
 
@@ -302,7 +302,8 @@ describe("get_file_language", function()
 
     -- Quarto YAML header-based kernelspec parsing edge cases
     it(
-        "returns `r` even with unrelated `language:`/`name:` content after the kernelspec block has ended",
+        "returns `r` even with unrelated `language:`/`name:` content after "
+            .. "the kernelspec block has ended",
         function()
             local yaml_header = {
                 "---",
@@ -317,7 +318,8 @@ describe("get_file_language", function()
         end
     )
     it(
-        "returns `r` for `kernelspec:` with blank/whitespace lines between it and `jupyter:`",
+        "returns `r` for `kernelspec:` with blank/whitespace lines between "
+            .. "it and `jupyter:`",
         function()
             local yaml_header = {
                 "---",
@@ -332,7 +334,8 @@ describe("get_file_language", function()
         end
     )
     it(
-        "returns `r` with `language:` is past a blank line inside the kernelspec block",
+        "returns `r` with `language:` is past a blank line inside the "
+            .. "kernelspec block",
         function()
             local yaml_header = {
                 "---",
@@ -361,7 +364,8 @@ describe("get_file_language", function()
         end
     )
     it(
-        "returns nil when `language:`/`name:` has same indentation as `kernelspec:`",
+        "returns nil when `language:`/`name:` has same indentation as "
+            .. "`kernelspec:`",
         function()
             local yaml_header = {
                 "---",
@@ -395,7 +399,8 @@ describe("get_file_language", function()
             get_language_for_yaml({ "---", "engine: jupyter", "---" })
         )
         assert_notified(
-            "Engine specifies 'jupyter' without a full kernelspec or short-form specification"
+            "Engine specifies 'jupyter' without a full kernelspec or "
+                .. "short-form specification"
         )
     end)
     it("returns nil for `engine:` (no kernelspec)", function()

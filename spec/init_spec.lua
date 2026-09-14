@@ -30,9 +30,9 @@ describe("_send_command_to_repl", function()
         vim.api.nvim_win_set_cursor(0, { 1, 0 })
         peek._command = operation
         peek._send_command_to_repl()
-        ---@diagnostic disable-next-line: undefined-field
         assert
             .stub(cmd_stub)
+            ---@diagnostic disable-next-line: undefined-field
             .was_called_with('SlimeSend0 "' .. command .. '\\n"')
     end
 
@@ -105,9 +105,9 @@ describe("_send_command_to_repl", function()
             vim.api.nvim_buf_set_mark(0, "[", 1, 0, {})
             vim.api.nvim_buf_set_mark(0, "]", 1, 6, {})
             peek._send_command_to_repl()
-            ---@diagnostic disable-next-line: undefined-field
             assert
                 .stub(cmd_stub)
+                ---@diagnostic disable-next-line: undefined-field
                 .was_called_with('SlimeSend0 "content.head()\\n"')
         end)
     end)
