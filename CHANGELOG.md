@@ -17,6 +17,7 @@
 - An empty `jupyter:` or `engine:` YAML field now correctly returns an error.
 - Using `jupyter:` now correctly takes precedence over `engine:` when using YAML
   language specification.
+- Correctly use case insensitive short-form YAML-based language specification
 
 ## [1.2.1] - 2026-09-01
 

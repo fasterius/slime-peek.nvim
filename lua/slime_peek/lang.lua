@@ -131,13 +131,13 @@ local function parse_yaml_table(lines)
     -- Loop over YAML header table and store relevant information
     local yaml = {}
     for i, line in ipairs(lines) do
-        -- Check if line matches either of the possible language specifications
-        -- Pattern works even for lines like `^knitr:$` with nothing after it,
-        -- as it returns "" (empty string), which is truthy for later checks
-        -- against e.g. `if yaml.knitr then ...`
-        local jupyter = line:match("^jupyter:%s*(.*)$")
-        local knitr = line:match("^knitr:%s*(.*)$")
-        local engine = line:match("^engine:%s*(.*)$")
+        -- Check if line (case-insensitively) matches either of the possible
+        -- language specifications. Pattern works even for lines like `^knitr:$`
+        -- with nothing after it, as it returns "" (empty string), which is
+        -- truthy for later checks against e.g. `if yaml.knitr then ...`
+        local jupyter = line:lower():match("^jupyter:%s*(.*)$")
+        local knitr = line:lower():match("^knitr:%s*(.*)$")
+        local engine = line:lower():match("^engine:%s*(.*)$")
 
         -- Check which language specifications exist, with priority given to
         -- jupyter and knitr over engine
