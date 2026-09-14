@@ -12,7 +12,10 @@ function M.check()
     if vim.fn.has("nvim-0.11.0") == 1 then
         vim.health.ok("Neovim version is >= 0.11.0")
     else
-        vim.health.error("Neovim version is too old", "slime-peek.nvim requires at least Neovim v0.11.0")
+        vim.health.error(
+            "Neovim version is too old",
+            "slime-peek.nvim requires at least Neovim v0.11.0"
+        )
     end
 
     if vim.fn.exists(":SlimeSend0") == 2 then
@@ -34,7 +37,8 @@ function M.check()
         vim.health.ok("No unrecognised configuration options")
     else
         vim.health.warn(
-            "Unrecognised configuration option(s): " .. table.concat(unknown, ", "),
+            "Unrecognised configuration option(s): "
+                .. table.concat(unknown, ", "),
             "Check for typos; see |slime-peek.configuration| for the supported options"
         )
     end

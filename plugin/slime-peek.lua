@@ -6,7 +6,9 @@ vim.g.loaded_slime_peek = 1
 -- 0.11.0 is required because `health.lua` uses `vim.health.start/ok/warn/
 -- error`, which aren't available on older versions
 if vim.fn.has("nvim-0.11.0") ~= 1 then
-    vim.api.nvim_err_writeln("slime-peek.nvim requires at least Neovim v0.11.0.")
+    vim.api.nvim_err_writeln(
+        "slime-peek.nvim requires at least Neovim v0.11.0."
+    )
     return
 end
 

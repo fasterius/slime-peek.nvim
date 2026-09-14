@@ -15,7 +15,12 @@ M.opts = vim.deepcopy(M.defaults)
 function M.setup(opts)
     opts = opts or {}
     vim.validate("opts", opts, "table")
-    vim.validate("opts.use_yaml_language", opts.use_yaml_language, "boolean", true)
+    vim.validate(
+        "opts.use_yaml_language",
+        opts.use_yaml_language,
+        "boolean",
+        true
+    )
     M.opts = vim.tbl_extend("force", M.opts, opts)
 end
 

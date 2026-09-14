@@ -37,7 +37,8 @@ local function get_text_from_operator_range()
 
     -- Get the line contents and return the text specified by the start and end
     -- positions. The `nvim_buf_get_lines()` function is 0-based for the start
-    local line = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)[1]
+    local line =
+        vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)[1]
     if not line then
         error("Could not get line for operator range", 0)
     end

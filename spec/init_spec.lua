@@ -31,7 +31,9 @@ describe("_send_command_to_repl", function()
         peek._command = operation
         peek._send_command_to_repl()
         ---@diagnostic disable-next-line: undefined-field
-        assert.stub(cmd_stub).was_called_with('SlimeSend0 "' .. command .. '\\n"')
+        assert
+            .stub(cmd_stub)
+            .was_called_with('SlimeSend0 "' .. command .. '\\n"')
     end
 
     -- Test dispatch for each individual language, but only a single command,
@@ -78,7 +80,13 @@ describe("_send_command_to_repl", function()
         end)
 
         it("returns error for multi-line selections", function()
-            vim.api.nvim_buf_set_lines(0, 0, -1, true, { "line one", "line two" })
+            vim.api.nvim_buf_set_lines(
+                0,
+                0,
+                -1,
+                true,
+                { "line one", "line two" }
+            )
             -- Set marks for start and end of the operator motion
             vim.api.nvim_buf_set_mark(0, "[", 1, 0, {})
             vim.api.nvim_buf_set_mark(0, "]", 2, 0, {})
@@ -86,7 +94,10 @@ describe("_send_command_to_repl", function()
             ---@diagnostic disable-next-line: undefined-field
             assert.stub(cmd_stub).was_not_called()
             ---@diagnostic disable-next-line: undefined-field
-            assert.stub(notify_stub).was_called_with("Error: Multi-line selections are not supported", vim.log.levels.ERROR)
+            assert.stub(notify_stub).was_called_with(
+                "Error: Multi-line selections are not supported",
+                vim.log.levels.ERROR
+            )
         end)
 
         it("sends the correct command for a valid single-line range", function()
@@ -95,7 +106,9 @@ describe("_send_command_to_repl", function()
             vim.api.nvim_buf_set_mark(0, "]", 1, 6, {})
             peek._send_command_to_repl()
             ---@diagnostic disable-next-line: undefined-field
-            assert.stub(cmd_stub).was_called_with('SlimeSend0 "content.head()\\n"')
+            assert
+                .stub(cmd_stub)
+                .was_called_with('SlimeSend0 "content.head()\\n"')
         end)
     end)
 
